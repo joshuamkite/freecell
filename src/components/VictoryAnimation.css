@@ -1,0 +1,144 @@
+.victory-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.victory-content {
+    position: relative;
+    text-align: center;
+}
+
+.victory-title {
+    font-size: 72px;
+    color: gold;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8),
+        0 0 40px rgba(255, 215, 0, 0.6);
+    margin-bottom: 40px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.victory-cards {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 60px;
+}
+
+.victory-card {
+    width: 100px;
+    height: 140px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    animation: cardBurst 1.5s ease-out forwards;
+}
+
+@keyframes cardBurst {
+    0% {
+        transform: scale(1) translateZ(0) rotateY(0deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5) translateZ(100px) rotateY(180deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(3) translateZ(300px) rotateY(360deg);
+        opacity: 0;
+    }
+}
+
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    font-size: 48px;
+    font-weight: bold;
+    animation: particleBurst 2s ease-out forwards;
+    opacity: 0;
+}
+
+.particle.suit-red {
+    color: #d32f2f;
+}
+
+.particle.suit-black {
+    color: #1a1a1a;
+}
+
+@keyframes particleBurst {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) translate(calc(var(--dx, 0) * 1px), calc(var(--dy, 0) * 1px)) scale(2) rotate(var(--rotation));
+        opacity: 0;
+    }
+}
+
+/* Individual particle variations */
+.particle:nth-child(4n+1) {
+    --dx: 200;
+    --dy: -300;
+}
+
+.particle:nth-child(4n+2) {
+    --dx: -200;
+    --dy: -300;
+}
+
+.particle:nth-child(4n+3) {
+    --dx: 300;
+    --dy: 200;
+}
+
+.particle:nth-child(4n) {
+    --dx: -300;
+    --dy: 200;
+}

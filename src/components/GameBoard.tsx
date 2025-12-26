@@ -1,47 +1,80 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useReducer } from 'react';
 import type { GameState } from '../types/gameState';
 import type { Card as CardType } from '../types/card';
 import { getRankValue } from '../types/card';
 import { Card } from './Card';
+import { VictoryAnimation } from './VictoryAnimation';
 import { dealCards, canMoveToTableau, canMoveToFoundation, checkWin } from '../game/freecellLogic';
 import './GameBoard.css';
 
+// Reducer for managing game state and history together
+type GameAction =
+    | { type: 'UPDATE_STATE'; newState: GameState }
+    | { type: 'UNDO' }
+    | { type: 'NEW_GAME'; initialState: GameState };
+
+interface GameReducerState {
+    current: GameState;
+    history: GameState[];
+}
+
+function gameReducer(state: GameReducerState, action: GameAction): GameReducerState {
+    switch (action.type) {
+        case 'UPDATE_STATE':
+            return {
+                current: action.newState,
+                history: [...state.history, state.current],
+            };
+        case 'UNDO':
+            if (state.history.length === 0) return state;
+            return {
+                current: state.history[state.history.length - 1],
+                history: state.history.slice(0, -1),
+            };
+        case 'NEW_GAME':
+            return {
+                current: action.initialState,
+                history: [],
+            };
+        default:
+            return state;
+    }
+}
+
 export function GameBoard() {
     const [gameNumber, setGameNumber] = useState(() => Math.floor(Math.random() * 1000000) + 1);
-    const [gameState, setGameState] = useState<GameState>(() => dealCards(gameNumber));
-    const [history, setHistory] = useState<GameState[]>([]);
+    const [gameReducerState, dispatch] = useReducer(gameReducer, { current: dealCards(gameNumber), history: [] });
+    const gameState = gameReducerState.current;
+    const history = gameReducerState.history;
+
     const [selectedCard, setSelectedCard] = useState<{ card: CardType; location: { type: string; index: number } } | null>(null);
     const [draggedCard, setDraggedCard] = useState<{ card: CardType; location: { type: string; index: number } } | null>(null);
+    const [showVictory, setShowVictory] = useState(false);
     const autoPlayTimeoutRef = useRef<number | null>(null);
 
     // Helper to update game state and save to history
     const updateGameState = (newState: GameState) => {
-        setHistory([...history, gameState]);
-        setGameState(newState);
+        dispatch({ type: 'UPDATE_STATE', newState });
     };
 
     const newGame = (num: number) => {
-        setGameState(dealCards(num));
+        dispatch({ type: 'NEW_GAME', initialState: dealCards(num) });
         setGameNumber(num);
         setSelectedCard(null);
         setDraggedCard(null);
-        setHistory([]);
+        setShowVictory(false);
     };
 
     const undo = () => {
-        if (history.length > 0) {
-            const previousState = history[history.length - 1];
-            setGameState(previousState);
-            setHistory(history.slice(0, -1));
-            setSelectedCard(null);
-        }
+        dispatch({ type: 'UNDO' });
+        setSelectedCard(null);
     };
 
     // Check for win condition
     useEffect(() => {
         if (checkWin(gameState)) {
             setTimeout(() => {
-                alert('Congratulations! You won!');
+                setShowVictory(true);
             }, 500);
         }
     }, [gameState]);
@@ -53,7 +86,18 @@ export function GameBoard() {
         }
 
         autoPlayTimeoutRef.current = window.setTimeout(() => {
-            const newState = { ...gameState };
+            // Deep copy the game state
+            const newState: GameState = {
+                ...gameState,
+                tableau: gameState.tableau.map(col => [...col]),
+                freeCells: [...gameState.freeCells],
+                foundations: {
+                    hearts: [...gameState.foundations.hearts],
+                    diamonds: [...gameState.foundations.diamonds],
+                    clubs: [...gameState.foundations.clubs],
+                    spades: [...gameState.foundations.spades],
+                },
+            };
             let moved = false;
 
             // Helper: Get the minimum rank in opposite color foundations
@@ -111,14 +155,14 @@ export function GameBoard() {
             if (moved) {
                 updateGameState(newState);
             }
-        }, 600); // Delay to allow previous animation to complete
+        }, 800); // Delay to make auto-play moves visible
 
         return () => {
             if (autoPlayTimeoutRef.current) {
                 clearTimeout(autoPlayTimeoutRef.current);
             }
         };
-    }, [gameState, history, gameState, updateGameState]);
+    }, [gameState]);
 
     const handleCardClick = (card: CardType, location: { type: string; index: number }) => {
         if (selectedCard) {
@@ -133,7 +177,18 @@ export function GameBoard() {
 
     const handleDoubleClick = (card: CardType, location: { type: string; index: number }) => {
         // Try to auto-move: first to foundation, then to free cell if from tableau
-        const newState = { ...gameState };
+        // Deep copy the game state
+        const newState: GameState = {
+            ...gameState,
+            tableau: gameState.tableau.map(col => [...col]),
+            freeCells: [...gameState.freeCells],
+            foundations: {
+                hearts: [...gameState.foundations.hearts],
+                diamonds: [...gameState.foundations.diamonds],
+                clubs: [...gameState.foundations.clubs],
+                spades: [...gameState.foundations.spades],
+            },
+        };
         let moved = false;
 
         // Try foundation first
@@ -209,7 +264,18 @@ export function GameBoard() {
         from: { card: CardType; location: { type: string; index: number } },
         to: { type: string; index: number }
     ) => {
-        const newState = { ...gameState };
+        // Deep copy the game state
+        const newState: GameState = {
+            ...gameState,
+            tableau: gameState.tableau.map(col => [...col]),
+            freeCells: [...gameState.freeCells],
+            foundations: {
+                hearts: [...gameState.foundations.hearts],
+                diamonds: [...gameState.foundations.diamonds],
+                clubs: [...gameState.foundations.clubs],
+                spades: [...gameState.foundations.spades],
+            },
+        };
         let moved = false;
 
         // Move to tableau
@@ -326,7 +392,13 @@ export function GameBoard() {
                                 <div
                                     key={index}
                                     className="cell"
-                                    onClick={() => card && handleCardClick(card, { type: 'freecell', index })}
+                                    onClick={() => {
+                                        if (card) {
+                                            handleCardClick(card, { type: 'freecell', index });
+                                        } else if (selectedCard) {
+                                            tryMove(selectedCard, { type: 'freecell', index });
+                                        }
+                                    }}
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => handleDrop(e, { type: 'freecell', index })}
                                 >
@@ -415,6 +487,8 @@ export function GameBoard() {
                     {' '}(Public Domain)
                 </p>
             </footer>
+
+            {showVictory && <VictoryAnimation />}
         </div>
     );
 }
