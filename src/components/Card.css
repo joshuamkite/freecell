@@ -1,0 +1,75 @@
+.card {
+    width: 100px;
+    height: 140px;
+    cursor: grab;
+    user-select: none;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.card:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    display: block;
+    pointer-events: none;
+}
+
+.card.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.card.selected {
+    outline: 3px solid #4a90e2;
+    outline-offset: 2px;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(74, 144, 226, 0.4);
+}
+
+.card.moving {
+    animation: cardMove 0.3s ease-out;
+}
+
+@keyframes cardMove {
+    0% {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(74, 144, 226, 0.5);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Card placeholder for empty slots */
+.card-placeholder {
+    width: 100px;
+    height: 140px;
+    border: 2px dashed #888;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 14px;
+}
+
+.card-placeholder.drop-target {
+    border-color: #4a90e2;
+    background-color: rgba(74, 144, 226, 0.2);
+}
