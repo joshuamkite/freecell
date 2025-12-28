@@ -5,6 +5,12 @@ TypeScript/React FreeCell implementation with Microsoft's original RNG algorithm
 ## Features
 
 - Microsoft FreeCell RNG: `seed = (seed * 214013 + 2531011) & 0x7FFFFFFF`
+- Smart game number selector:
+  - Green input indicates current game number
+  - Black input when typing a different number
+  - "Set Deal" button to apply selected game
+  - "New Game" button to generate random game
+  - 20-second auto-revert if deal not applied
 - Click-to-move, drag-and-drop, double-click auto-move
 - Auto-play: cards automatically move to foundations when safe
 - Undo functionality

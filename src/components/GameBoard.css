@@ -1,12 +1,18 @@
 .game-board {
     min-height: 100vh;
     background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
-    padding: 20px;
+    padding: var(--board-padding, 20px);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --card-width: 100px;
+    --card-height: 140px;
+    --card-gap: 10px;
+    --board-padding: 20px;
+    /* Desktop game width: This is overwritten by JavaScript. Adjust 'gameWidthPercent' in GameBoard.tsx instead. */
+    --max-game-width: 65%;
 }
 
 .game-header {
-    max-width: 1200px;
+    max-width: var(--max-game-width, 80%);
     margin: 0 auto 30px;
     display: flex;
     justify-content: space-between;
@@ -15,7 +21,7 @@
     padding: 15px 25px;
     border-radius: 8px;
     backdrop-filter: blur(10px);
-    gap: 30px;
+    gap: 20px;
 }
 
 .game-header h1 {
@@ -57,6 +63,7 @@
     display: flex;
     gap: 15px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .game-controls label {
@@ -73,6 +80,15 @@
     border: none;
     border-radius: 4px;
     font-size: 14px;
+    transition: background-color 0.3s, color 0.3s;
+    background-color: #1a1a1a;
+    color: white;
+}
+
+.game-controls input[type="number"].game-number-match {
+    background-color: #2d7a4a;
+    color: white;
+    font-weight: 500;
 }
 
 .game-controls button {
@@ -87,7 +103,7 @@
     transition: background 0.2s;
 }
 
-.game-controls button:hover {
+.game-controls button:hover:not(:disabled) {
     background: #357abd;
 }
 
@@ -98,59 +114,52 @@
 }
 
 .game-area {
-    max-width: 1200px;
+    width: 100%;
+    max-width: var(--max-game-width, 80%);
     margin: 0 auto;
 }
 
 .top-area {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: repeat(8, var(--card-width, 100px));
+    gap: var(--card-gap, 10px);
+    margin-bottom: calc(var(--card-gap, 10px) * 4);
+    width: 100%;
+    align-items: start;
 }
 
-.free-cells,
+.free-cells {
+    grid-column: 1 / 5;
+    display: contents;
+}
+
 .foundations {
-    flex: 1;
-}
-
-.free-cells h3,
-.foundations h3 {
-    color: white;
-    margin: 0 0 10px 0;
-    font-size: 16px;
-    font-weight: 500;
+    grid-column: 5 / 9;
+    display: contents;
 }
 
 .cell-row {
-    display: flex;
-    gap: 10px;
+    display: contents;
 }
 
 .cell {
     cursor: pointer;
 }
 
-.foundations {
-    text-align: right;
-}
-
-.foundations .cell-row {
-    justify-content: flex-end;
-}
-
 .tableau {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(8, var(--card-width, 100px));
+    gap: var(--card-gap, 10px);
+    width: 100%;
 }
 
 .tableau-column {
-    min-height: 400px;
+    min-height: calc(var(--card-height, 140px) * 3.5);
 }
 
 .column-drop-zone {
-    min-height: 400px;
-    border-radius: 6px;
+    min-height: calc(var(--card-height, 140px) * 3.5);
+    border-radius: calc(var(--card-width, 100px) * 0.06);
     transition: background-color 0.2s;
     display: flex;
     flex-direction: column;
@@ -174,62 +183,226 @@
     font-weight: bold;
 }
 
-/* Responsive design */
-@media (max-width: 1024px) {
-    .tableau {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
-    .tableau-column:nth-child(n + 5) {
-        margin-top: 20px;
-    }
-}
-
-@media (max-width: 768px) {
-    .game-header {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .game-controls {
-        flex-wrap: wrap;
-    }
-
-    .top-area {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .foundations {
-        text-align: left;
-    }
-
-    .foundations .cell-row {
-        justify-content: flex-start;
-    }
-}
-
 /* Footer */
 .game-footer {
-    max-width: 1200px;
+    max-width: var(--max-game-width, 80%);
     margin: 40px auto 0;
     padding: 20px;
     text-align: center;
 }
 
-.game-footer p {
-    color: rgba(255, 255, 255, 0.7);
+.footer-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.footer-button {
+    padding: 8px 16px;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     font-size: 14px;
-    margin: 0;
-}
-
-.game-footer a {
-    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    transition: background 0.2s;
     text-decoration: none;
-    transition: color 0.2s;
+    display: inline-block;
+    font-family: inherit;
 }
 
-.game-footer a:hover {
-    color: #ffffff;
-    text-decoration: underline;
+.footer-button:hover {
+    background: #357abd;
+    text-decoration: none;
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+    .game-board {
+        --board-padding: 8px;
+        --card-gap: 5px;
+        padding: var(--board-padding);
+        --max-game-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .game-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        max-width: 100%;
+    }
+
+    .game-area {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .game-header h1 {
+        font-size: 24px;
+    }
+
+    .game-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .game-controls button {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .game-controls input[type="number"] {
+        width: 80px;
+        padding: 5px 8px;
+        font-size: 13px;
+    }
+
+    .top-area {
+        margin-bottom: calc(var(--card-gap) * 3);
+        grid-template-columns: repeat(8, var(--card-width, 100px));
+    }
+
+    .tableau-column {
+        min-height: calc(var(--card-height) * 2.5);
+    }
+
+    .column-drop-zone {
+        min-height: calc(var(--card-height) * 2.5);
+    }
+
+    .game-footer {
+        margin-top: 20px;
+        padding: 15px;
+        max-width: 100%;
+    }
+
+    .footer-buttons {
+        gap: 10px;
+    }
+
+    .footer-button {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .game-board {
+        --board-padding: 5px;
+        --card-gap: 3px;
+    }
+
+    .game-header {
+        padding: 10px;
+        margin-bottom: 10px;
+        gap: 8px;
+    }
+
+    .game-header h1 {
+        font-size: 20px;
+    }
+
+    .game-controls button {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    .game-controls input[type="number"] {
+        width: 70px;
+        padding: 4px 6px;
+        font-size: 11px;
+    }
+
+    .game-controls label {
+        font-size: 11px;
+    }
+
+    .top-area {
+        margin-bottom: calc(var(--card-gap) * 2);
+    }
+
+    .tableau-column {
+        min-height: calc(var(--card-height) * 2);
+    }
+
+    .column-drop-zone {
+        min-height: calc(var(--card-height) * 2);
+    }
+
+    .game-footer {
+        margin-top: 15px;
+        padding: 10px;
+    }
+
+    .footer-button {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+}
+
+/* Responsive card sizing */
+@media (max-width: 768px) {
+
+    .top-area,
+    .tableau {
+        --card-width: calc((100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) / 8);
+        --card-height: calc(var(--card-width) * 1.4);
+    }
+}
+
+@media (max-width: 480px) {
+
+    .top-area,
+    .tableau {
+        --card-width: calc((100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) / 8);
+        --card-height: calc(var(--card-width) * 1.4);
+    }
+}
+
+/* Landscape orientation adjustments for mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+    .game-board {
+        --board-padding: 5px;
+        --card-gap: 4px;
+    }
+
+    .game-header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+        max-width: 100%;
+    }
+
+    .game-area {
+        max-width: 100%;
+    }
+
+    .game-header h1 {
+        font-size: 18px;
+    }
+
+    .tableau-column {
+        min-height: calc(var(--card-height) * 2);
+    }
+
+    .column-drop-zone {
+        min-height: calc(var(--card-height) * 2);
+    }
+
+    .game-footer {
+        max-width: 100%;
+    }
+
+    .top-area,
+    .tableau {
+        --card-width: calc((100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) / 8);
+        --card-height: calc(var(--card-width) * 1.4);
+    }
 }

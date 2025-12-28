@@ -21,10 +21,16 @@ This is a TypeScript React implementation of the classic FreeCell solitaire card
 
 ## Key Features
 1. **Microsoft FreeCell RNG Algorithm**: Uses seeded random number generator for reproducible deals (games numbered 1-1,000,000)
-2. **Card Images**: SVG card images from Wikimedia Commons
-3. **Game Mechanics**: Full FreeCell rules implementation
-4. **UI Interaction**: Drag-and-drop or click-to-move card interaction
-5. **Win Detection**: Automatic detection when game is won
+2. **Smart Game Number Selector**:
+   - Visual feedback: green background when number matches current game, black when typing different number
+   - Dynamic button: "New Game" generates random game, "Set Deal" applies selected game number
+   - 20-second auto-revert timer if deal not applied after changing number
+3. **Card Images**: SVG card images from Wikimedia Commons
+4. **Game Mechanics**: Full FreeCell rules implementation
+5. **UI Interaction**: Drag-and-drop or click-to-move card interaction
+6. **Auto-play**: Cards automatically move to foundations when safe
+7. **Undo System**: Full move history with undo functionality
+8. **Win Detection**: Automatic detection when game is won
 
 ## Development Commands
 - `bun install` - Install dependencies

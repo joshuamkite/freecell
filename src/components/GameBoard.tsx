@@ -4,6 +4,7 @@ import type { Card as CardType } from '../types/card';
 import { getRankValue } from '../types/card';
 import { Card } from './Card';
 import { VictoryAnimation } from './VictoryAnimation';
+import { LicenseModal } from './LicenseModal';
 import { dealCards, canMoveToTableau, canMoveToFoundation, checkWin } from '../game/freecellLogic';
 import './GameBoard.css';
 
@@ -42,15 +43,27 @@ function gameReducer(state: GameReducerState, action: GameAction): GameReducerSt
 }
 
 export function GameBoard() {
-    const [gameNumber, setGameNumber] = useState(() => Math.floor(Math.random() * 1000000) + 1);
-    const [gameReducerState, dispatch] = useReducer(gameReducer, { current: dealCards(gameNumber), history: [] });
+    // Current game number (the actual game being played)
+    const [currentGameNumber, setCurrentGameNumber] = useState(() => Math.floor(Math.random() * 1000000) + 1);
+
+    // Input value (what the user has typed)
+    const [inputValue, setInputValue] = useState(() => currentGameNumber.toString());
+
+    const [gameReducerState, dispatch] = useReducer(gameReducer, {
+        current: dealCards(currentGameNumber),
+        history: []
+    });
     const gameState = gameReducerState.current;
     const history = gameReducerState.history;
 
     const [selectedCard, setSelectedCard] = useState<{ card: CardType; location: { type: string; index: number } } | null>(null);
     const [draggedCard, setDraggedCard] = useState<{ card: CardType; location: { type: string; index: number } } | null>(null);
     const [showVictory, setShowVictory] = useState(false);
+    const [showLicense, setShowLicense] = useState(false);
     const autoPlayTimeoutRef = useRef<number | null>(null);
+    const revertTimerRef = useRef<number | null>(null);
+    const gameBoardRef = useRef<HTMLDivElement>(null);
+    const gameAreaRef = useRef<HTMLDivElement>(null);
 
     // Helper to update game state and save to history
     const updateGameState = (newState: GameState) => {
@@ -59,11 +72,57 @@ export function GameBoard() {
 
     const newGame = (num: number) => {
         dispatch({ type: 'NEW_GAME', initialState: dealCards(num) });
-        setGameNumber(num);
+        setCurrentGameNumber(num);
+        setInputValue(num.toString());
         setSelectedCard(null);
         setDraggedCard(null);
         setShowVictory(false);
+
+        // Clear any pending revert timer
+        if (revertTimerRef.current) {
+            clearTimeout(revertTimerRef.current);
+            revertTimerRef.current = null;
+        }
     };
+
+    // Handle game number input change
+    const handleGameNumberChange = (value: string) => {
+        setInputValue(value);
+
+        // Clear existing revert timer
+        if (revertTimerRef.current) {
+            clearTimeout(revertTimerRef.current);
+            revertTimerRef.current = null;
+        }
+
+        const num = parseInt(value) || 1;
+        const clampedNum = Math.max(1, Math.min(1000000, num));
+
+        // Only start timer if the input differs from current game
+        if (clampedNum !== currentGameNumber) {
+            // Start 20-second timer to revert
+            revertTimerRef.current = window.setTimeout(() => {
+                setInputValue(currentGameNumber.toString());
+                revertTimerRef.current = null;
+            }, 20000);
+        }
+    };
+
+    // Apply the new game number
+    const applyGameNumber = () => {
+        const num = parseInt(inputValue) || 1;
+        const clampedNum = Math.max(1, Math.min(1000000, num));
+        newGame(clampedNum);
+    };
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (revertTimerRef.current) {
+                clearTimeout(revertTimerRef.current);
+            }
+        };
+    }, []);
 
     const undo = () => {
         dispatch({ type: 'UNDO' });
@@ -163,6 +222,66 @@ export function GameBoard() {
             }
         };
     }, [gameState]);
+
+    // Calculate and set card dimensions based on game area width
+    useEffect(() => {
+        const calculateCardDimensions = () => {
+            if (!gameBoardRef.current || !gameAreaRef.current) return;
+
+            // Determine board padding based on screen size (matches CSS media queries)
+            let boardPadding = 20; // Desktop default
+            if (window.innerWidth <= 480) {
+                boardPadding = 5;
+            } else if (window.innerWidth <= 768) {
+                boardPadding = 8;
+            }
+
+            // Desktop game width: Change this value to adjust game width (0.6 = 60%, 0.7 = 70%, 0.8 = 80%)
+            const gameWidthPercent = 0.65;
+
+            const viewportWidth = window.innerWidth - (boardPadding * 2);
+            const availableWidth = viewportWidth * gameWidthPercent;
+
+            // Determine gap based on screen size (matches CSS media queries)
+            let cardGap = 10; // Desktop default
+            if (window.innerWidth <= 480) {
+                cardGap = 3;
+            } else if (window.innerWidth <= 768) {
+                cardGap = 5;
+            }
+
+            // FreeCell: 8 columns
+            const tableauItems = 8;
+            const tableauGaps = tableauItems - 1;
+
+            // Calculate card width to fill available space
+            let cardWidth = (availableWidth - (tableauGaps * cardGap)) / tableauItems;
+
+            // Set reasonable bounds (minimum 60px)
+            const minWidth = 60;
+            cardWidth = Math.max(minWidth, cardWidth);
+
+            // Maintain 5:7 aspect ratio (width:height)
+            const cardHeight = cardWidth * 1.4;
+
+            // Set CSS custom properties
+            gameBoardRef.current.style.setProperty('--card-width', `${cardWidth}px`);
+            gameBoardRef.current.style.setProperty('--card-height', `${cardHeight}px`);
+            gameBoardRef.current.style.setProperty('--card-gap', `${cardGap}px`);
+            gameBoardRef.current.style.setProperty('--board-padding', `${boardPadding}px`);
+            gameBoardRef.current.style.setProperty('--max-game-width', `${gameWidthPercent * 100}%`);
+        };
+
+        calculateCardDimensions();
+
+        // Recalculate on window resize
+        const handleResize = () => {
+            calculateCardDimensions();
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleCardClick = (card: CardType, location: { type: string; index: number }) => {
         if (selectedCard) {
@@ -296,6 +415,15 @@ export function GameBoard() {
                         newState.freeCells[from.location.index] = null;
                         moved = true;
                     }
+                } else if (from.location.type === 'foundation') {
+                    const suit = ['hearts', 'diamonds', 'clubs', 'spades'][from.location.index] as keyof typeof newState.foundations;
+                    const foundation = newState.foundations[suit];
+                    if (foundation[foundation.length - 1]?.id === from.card.id) {
+                        const newFoundation = [...foundation];
+                        newFoundation.pop();
+                        newState.foundations[suit] = newFoundation;
+                        moved = true;
+                    }
                 }
 
                 if (moved) {
@@ -314,6 +442,16 @@ export function GameBoard() {
                     if (sourceColumn[sourceColumn.length - 1]?.id === from.card.id) {
                         sourceColumn.pop();
                         newState.tableau[from.location.index] = sourceColumn;
+                        newState.freeCells[to.index] = from.card;
+                        moved = true;
+                    }
+                } else if (from.location.type === 'foundation') {
+                    const suit = ['hearts', 'diamonds', 'clubs', 'spades'][from.location.index] as keyof typeof newState.foundations;
+                    const foundation = newState.foundations[suit];
+                    if (foundation[foundation.length - 1]?.id === from.card.id) {
+                        const newFoundation = [...foundation];
+                        newFoundation.pop();
+                        newState.foundations[suit] = newFoundation;
                         newState.freeCells[to.index] = from.card;
                         moved = true;
                     }
@@ -353,37 +491,41 @@ export function GameBoard() {
     };
 
     return (
-        <div className="game-board">
+        <div className="game-board" ref={gameBoardRef}>
             <div className="game-header">
                 <h1>FreeCell</h1>
 
-                <div className="undo-controls">
-                    <button onClick={undo} disabled={history.length === 0}>Undo</button>
-                </div>
-
                 <div className="game-controls">
-                    <button onClick={() => {
-                        const randomNum = Math.floor(Math.random() * 1000000) + 1;
-                        newGame(randomNum);
-                    }}>New Game</button>
+                    <button onClick={undo} disabled={history.length === 0}>Undo</button>
                     <label>
                         Game #:
                         <input
                             type="number"
                             min="1"
                             max="1000000"
-                            value={gameNumber}
-                            onChange={(e) => {
-                                const num = parseInt(e.target.value) || 1;
-                                setGameNumber(Math.max(1, Math.min(1000000, num)));
-                            }}
+                            value={inputValue}
+                            onChange={(e) => handleGameNumberChange(e.target.value)}
+                            className={parseInt(inputValue) === currentGameNumber ? 'game-number-match' : ''}
                         />
                     </label>
-                    <button onClick={() => newGame(gameNumber)}>Play Game #</button>
+                    <button onClick={() => {
+                        const num = parseInt(inputValue) || 1;
+                        const clampedNum = Math.max(1, Math.min(1000000, num));
+                        if (clampedNum === currentGameNumber) {
+                            // If already on current game, generate random new game
+                            const randomNum = Math.floor(Math.random() * 1000000) + 1;
+                            newGame(randomNum);
+                        } else {
+                            // Apply the selected game number
+                            applyGameNumber();
+                        }
+                    }}>
+                        {parseInt(inputValue) === currentGameNumber ? 'New Game' : 'Set Deal'}
+                    </button>
                 </div>
             </div>
 
-            <div className="game-area">
+            <div className="game-area" ref={gameAreaRef}>
                 {/* Free Cells and Foundations */}
                 <div className="top-area">
                     <div className="free-cells">
@@ -428,12 +570,25 @@ export function GameBoard() {
                                     <div
                                         key={suit}
                                         className={`cell foundation-${suit}`}
-                                        onClick={() => selectedCard && tryMove(selectedCard, { type: 'foundation', index })}
+                                        onClick={() => {
+                                            if (topCard) {
+                                                handleCardClick(topCard, { type: 'foundation', index });
+                                            } else if (selectedCard) {
+                                                tryMove(selectedCard, { type: 'foundation', index });
+                                            }
+                                        }}
                                         onDragOver={handleDragOver}
                                         onDrop={(e) => handleDrop(e, { type: 'foundation', index })}
                                     >
                                         {topCard ? (
-                                            <Card card={topCard} />
+                                            <Card
+                                                card={topCard}
+                                                draggable={true}
+                                                onDragStart={(e) => handleDragStart(e, topCard, { type: 'foundation', index })}
+                                                onDragEnd={handleDragEnd}
+                                                onDoubleClick={() => handleDoubleClick(topCard, { type: 'foundation', index })}
+                                                className={selectedCard?.card.id === topCard.id ? 'selected' : ''}
+                                            />
                                         ) : (
                                             <div className="card-placeholder"></div>
                                         )}
@@ -465,7 +620,10 @@ export function GameBoard() {
                                         onClick={() => cardIndex === column.length - 1 && handleCardClick(card, { type: 'tableau', index: columnIndex })}
                                         onDoubleClick={() => cardIndex === column.length - 1 && handleDoubleClick(card, { type: 'tableau', index: columnIndex })}
                                         className={selectedCard?.card.id === card.id ? 'selected' : ''}
-                                        style={{ marginTop: cardIndex === 0 ? '0' : '-110px' }}
+                                        style={{
+                                            // Tableau card overlap: -0.75 = 75% overlap. Adjust value between 0 (no overlap) and -1 (100% overlap)
+                                            marginTop: cardIndex === 0 ? '0' : `calc(var(--card-height, 140px) * -0.75)`
+                                        }}
                                     />
                                 ))}
                             </div>
@@ -475,20 +633,37 @@ export function GameBoard() {
             </div>
 
             <footer className="game-footer">
-                <p>
-                    Card images by Byron Knoll,{' '}
+                <div className="footer-buttons">
                     <a
-                        href="https://commons.wikimedia.org/wiki/Category:SVG_English_pattern_playing_cards"
+                        href="https://www.joshuakite.co.uk/"
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="footer-button"
                     >
-                        Wikimedia Commons
+                        Visit my Website
                     </a>
-                    {' '}(Public Domain)
-                </p>
+                    <button
+                        onClick={() => setShowLicense(true)}
+                        className="footer-button"
+                    >
+                        View Licences
+                    </button>
+                    <a
+                        href="https://github.com/joshuamkite/freecell"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="footer-button"
+                    >
+                        View Source
+                    </a>
+                </div>
             </footer>
 
-            {showVictory && <VictoryAnimation />}
+            {showVictory && <VictoryAnimation onClose={() => setShowVictory(false)} />}
+
+            {showLicense && (
+                <LicenseModal onClose={() => setShowLicense(false)} />
+            )}
         </div>
     );
 }
