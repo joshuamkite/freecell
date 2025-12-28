@@ -31,6 +31,12 @@
     font-weight: 600;
 }
 
+.game-stats {
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+}
+
 .undo-controls {
     display: flex;
     align-items: center;
@@ -170,17 +176,38 @@
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Foundation suit indicators */
-.foundation-hearts .card-placeholder,
-.foundation-diamonds .card-placeholder {
-    color: #d32f2f;
-    font-weight: bold;
+/* Foundation suit indicators - faint icons in background */
+.foundation-hearts .card-placeholder::before,
+.foundation-diamonds .card-placeholder::before,
+.foundation-clubs .card-placeholder::before,
+.foundation-spades .card-placeholder::before {
+    font-size: calc(var(--card-width, 100px) * 0.5);
+    opacity: 0.3;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
-.foundation-clubs .card-placeholder,
-.foundation-spades .card-placeholder {
+.foundation-hearts .card-placeholder::before {
+    content: '♥';
+    color: #d32f2f;
+}
+
+.foundation-diamonds .card-placeholder::before {
+    content: '♦';
+    color: #d32f2f;
+}
+
+.foundation-clubs .card-placeholder::before {
+    content: '♣';
     color: #1a1a1a;
-    font-weight: bold;
+}
+
+.foundation-spades .card-placeholder::before {
+    content: '♠';
+    color: #1a1a1a;
 }
 
 /* Footer */
@@ -245,6 +272,10 @@
         font-size: 24px;
     }
 
+    .game-stats {
+        font-size: 14px;
+    }
+
     .game-controls {
         flex-wrap: wrap;
         justify-content: center;
@@ -306,6 +337,10 @@
 
     .game-header h1 {
         font-size: 20px;
+    }
+
+    .game-stats {
+        font-size: 12px;
     }
 
     .game-controls button {
@@ -386,6 +421,10 @@
 
     .game-header h1 {
         font-size: 18px;
+    }
+
+    .game-stats {
+        font-size: 12px;
     }
 
     .tableau-column {

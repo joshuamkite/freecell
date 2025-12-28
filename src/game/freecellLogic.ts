@@ -5,14 +5,18 @@ import { shuffleFreeCellDeck } from '../utils/freecellRng';
 
 /**
  * Create a standard 52-card deck
+ * Microsoft FreeCell order: card_index = rank * 4 + suit
+ * Where suit: 0=clubs, 1=diamonds, 2=hearts, 3=spades (CDHS order)
+ * And rank: 0=ace, 1=2, ..., 12=king
  */
 export function createDeck(): Card[] {
-    const suits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
+    const suits: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades'];
     const ranks: Rank[] = ['ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king'];
 
     const deck: Card[] = [];
-    for (const suit of suits) {
-        for (const rank of ranks) {
+    // Microsoft FreeCell order: ranks first, then suits (SHDC)
+    for (const rank of ranks) {
+        for (const suit of suits) {
             deck.push({
                 suit,
                 rank,
@@ -44,11 +48,15 @@ export function dealCards(gameNumber: number): GameState {
         spades: [],
     };
 
-    // Deal cards to tableau
+    // Deal cards to tableau in row-major order (across columns first, then down)
+    // First 4 columns get 7 cards, last 4 get 6 cards
     let cardIndex = 0;
-    for (let col = 0; col < 8; col++) {
-        const cardsInColumn = col < 4 ? 7 : 6;
-        for (let row = 0; row < cardsInColumn; row++) {
+    for (let row = 0; row < 7; row++) {
+        for (let col = 0; col < 8; col++) {
+            // Last 4 columns only get 6 cards (skip row 6)
+            if (row === 6 && col >= 4) {
+                continue;
+            }
             tableau[col].push(shuffledDeck[cardIndex++]);
         }
     }

@@ -1,65 +1,37 @@
 /**
  * Microsoft FreeCell RNG Implementation
- * 
- * This implements the Linear Congruential Generator (LCG) used in 
- * Microsoft's original FreeCell game, which allows for reproducible
- * deals numbered 1 through 1,000,000.
- * 
- * Algorithm: seed = (seed * 214013 + 2531011) & 0x7FFFFFFF
+ *
+ * Based on https://github.com/macroxue/freecell
+ * Matches the exact algorithm used by freecellgamesolutions.com
  */
-
-export class FreeCellRNG {
-    private seed: number;
-
-    constructor(gameNumber: number) {
-        // Initialize with game number
-        this.seed = gameNumber;
-    }
-
-    /**
-     * Generate next random number
-     * Uses Microsoft's LCG algorithm
-     */
-    next(): number {
-        this.seed = ((this.seed * 214013 + 2531011) & 0x7FFFFFFF) >>> 0;
-        return this.seed;
-    }
-
-    /**
-     * Generate random number in range [0, max)
-     */
-    nextInRange(max: number): number {
-        return this.next() % max;
-    }
-
-    /**
-     * Reset RNG with new game number
-     */
-    reset(gameNumber: number): void {
-        this.seed = gameNumber;
-    }
-
-    /**
-     * Get current seed value
-     */
-    getSeed(): number {
-        return this.seed;
-    }
-}
 
 /**
- * Shuffle array using Microsoft FreeCell algorithm
- * Note: The original Microsoft FreeCell shuffles from end to beginning
+ * Shuffle deck using Microsoft FreeCell algorithm
+ * Uses forward iteration with reverse at the end
  */
-export function shuffleFreeCellDeck<T>(array: T[], gameNumber: number): T[] {
-    const result = [...array];
-    const rng = new FreeCellRNG(gameNumber);
+export function shuffleFreeCellDeck<T>(array: T[], dealNum: number): T[] {
+    const deck = [...array];
+    let seed = dealNum;
 
-    // Shuffle from end to beginning (Microsoft FreeCell style)
-    for (let i = result.length - 1; i > 0; i--) {
-        const j = rng.nextInRange(i + 1);
-        [result[i], result[j]] = [result[j], result[i]];
+    // Shuffle forward from i=0 to i=51
+    for (let i = 0; i < deck.length; i++) {
+        const cardsLeft = deck.length - i;
+
+        // Update seed using Microsoft's LCG
+        seed = ((seed * 214013 + 2531011) & 0xffffffff) >>> 0;
+
+        // Extract random value from high-order bits
+        const rand = (seed >> 16) & 0x7fff;
+
+        // Calculate position - special handling for large deal numbers
+        const rect = dealNum < 0x80000000
+            ? rand % cardsLeft
+            : (rand | 0x8000) % cardsLeft;
+
+        // Swap deck[rect] with deck[cardsLeft - 1]
+        [deck[rect], deck[cardsLeft - 1]] = [deck[cardsLeft - 1], deck[rect]];
     }
 
-    return result;
+    // Reverse the deck to get final order
+    return deck.reverse();
 }

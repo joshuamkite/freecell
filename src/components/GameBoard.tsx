@@ -70,7 +70,15 @@ export function GameBoard() {
         dispatch({ type: 'UPDATE_STATE', newState });
     };
 
-    const newGame = (num: number) => {
+    const newGame = (num: number, skipWarning: boolean = false) => {
+        // Warn if game is in progress (has history and not won)
+        if (!skipWarning && history.length > 0 && !checkWin(gameState)) {
+            const confirmed = window.confirm(
+                'Starting a new game will lose your current progress. Are you sure?'
+            );
+            if (!confirmed) return;
+        }
+
         dispatch({ type: 'NEW_GAME', initialState: dealCards(num) });
         setCurrentGameNumber(num);
         setInputValue(num.toString());
@@ -110,9 +118,17 @@ export function GameBoard() {
 
     // Apply the new game number
     const applyGameNumber = () => {
+        // Warn if game is in progress (has history and not won)
+        if (history.length > 0 && !checkWin(gameState)) {
+            const confirmed = window.confirm(
+                'Changing to a different game will lose your current progress. Are you sure?'
+            );
+            if (!confirmed) return;
+        }
+
         const num = parseInt(inputValue) || 1;
         const clampedNum = Math.max(1, Math.min(1000000, num));
-        newGame(clampedNum);
+        newGame(clampedNum, true); // skipWarning = true since we already confirmed
     };
 
     // Cleanup timer on unmount
@@ -128,6 +144,22 @@ export function GameBoard() {
         dispatch({ type: 'UNDO' });
         setSelectedCard(null);
     };
+
+    // Warn before leaving page if game is in progress
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            // Only warn if game is in progress (has history and not won)
+            if (history.length > 0 && !checkWin(gameState)) {
+                e.preventDefault();
+                // Modern browsers require returnValue to be set
+                e.returnValue = '';
+                return '';
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [history.length, gameState]);
 
     // Check for win condition
     useEffect(() => {
@@ -494,6 +526,10 @@ export function GameBoard() {
         <div className="game-board" ref={gameBoardRef}>
             <div className="game-header">
                 <h1>FreeCell</h1>
+
+                <div className="game-stats">
+                    <span>Moves: {history.length}</span>
+                </div>
 
                 <div className="game-controls">
                     <button onClick={undo} disabled={history.length === 0}>Undo</button>
