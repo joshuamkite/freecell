@@ -160,11 +160,11 @@
 }
 
 .tableau-column {
-    min-height: calc(var(--card-height, 140px) * 3.5);
+    min-height: calc(var(--card-height, 140px) * 2.5);
 }
 
 .column-drop-zone {
-    min-height: calc(var(--card-height, 140px) * 3.5);
+    min-height: calc(var(--card-height, 140px) * 2.5);
     border-radius: calc(var(--card-width, 100px) * 0.06);
     transition: background-color 0.2s;
     display: flex;
@@ -299,11 +299,11 @@
     }
 
     .tableau-column {
-        min-height: calc(var(--card-height) * 2.5);
+        min-height: calc(var(--card-height) * 2);
     }
 
     .column-drop-zone {
-        min-height: calc(var(--card-height) * 2.5);
+        min-height: calc(var(--card-height) * 2);
     }
 
     .game-footer {
@@ -363,11 +363,11 @@
     }
 
     .tableau-column {
-        min-height: calc(var(--card-height) * 2);
+        min-height: calc(var(--card-height) * 1.5);
     }
 
     .column-drop-zone {
-        min-height: calc(var(--card-height) * 2);
+        min-height: calc(var(--card-height) * 1.5);
     }
 
     .game-footer {
@@ -428,11 +428,11 @@
     }
 
     .tableau-column {
-        min-height: calc(var(--card-height) * 2);
+        min-height: calc(var(--card-height) * 1.5);
     }
 
     .column-drop-zone {
-        min-height: calc(var(--card-height) * 2);
+        min-height: calc(var(--card-height) * 1.5);
     }
 
     .game-footer {

@@ -53,42 +53,6 @@ export const LicenseModal = ({ onClose }: LicenseModalProps) => {
                 </section>
 
                 <section className="license-section">
-                    <h2>Card Backs</h2>
-                    <p>
-                        <strong>Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)</strong>
-                    </p>
-                    <p>
-                        Card back designs from{' '}
-                        <a
-                            href="https://commons.wikimedia.org/wiki/File:Reverso_baraja_espa%C3%B1ola.svg"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Reverso baraja española
-                        </a>
-                        {' '}(blue) and{' '}
-                        <a
-                            href="https://commons.wikimedia.org/wiki/File:Reverso_baraja_espa%C3%B1ola_rojo.svg"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Reverso baraja española rojo
-                        </a>
-                        {' '}(red) via Wikimedia Commons.
-                    </p>
-                    <p>
-                        License:{' '}
-                        <a
-                            href="https://creativecommons.org/licenses/by-sa/3.0/deed.en"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            CC BY-SA 3.0
-                        </a>
-                    </p>
-                </section>
-
-                <section className="license-section">
                     <h2>Card Face Images</h2>
                     <p>
                         <strong>Public Domain</strong>

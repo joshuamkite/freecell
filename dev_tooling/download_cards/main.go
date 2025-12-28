@@ -116,35 +116,8 @@ func main() {
 		return
 	}
 
-	// Download card backs first
-	fmt.Println("=== Downloading Card Backs ===")
-	cardBacks := map[string]string{
-		"card-back-red.svg":  "Reverso_baraja_española_rojo.svg",
-		"card-back-blue.svg": "Reverso_baraja_española.svg",
-	}
-
-	for localName, wikiName := range cardBacks {
-		fmt.Printf("Getting URL for: %s\n", wikiName)
-		imgURL, err := getImageURL(wikiName)
-		if err != nil {
-			fmt.Printf("  Error getting URL: %v\n", err)
-			continue
-		}
-
-		filepath := path.Join(dir, localName)
-		fmt.Printf("  Downloading from: %s\n", imgURL)
-		if err := downloadFile(imgURL, filepath); err != nil {
-			fmt.Printf("  Error downloading: %v\n", err)
-		} else {
-			fmt.Printf("  ✓ Downloaded: %s\n", localName)
-		}
-
-		// Rate limiting - wait between requests
-		time.Sleep(500 * time.Millisecond)
-	}
-
 	// Download playing cards
-	fmt.Println("\n=== Downloading Playing Cards ===")
+	fmt.Println("=== Downloading Playing Cards ===")
 	suits := []string{"hearts", "diamonds", "clubs", "spades"}
 	ranks := []string{"ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"}
 
@@ -186,6 +159,5 @@ func main() {
 	fmt.Printf("\n=== Download Summary ===\n")
 	fmt.Printf("Successfully downloaded: %d cards\n", successCount)
 	fmt.Printf("Failed: %d cards\n", failCount)
-	fmt.Printf("Card backs: 2\n")
 	fmt.Printf("Cards saved to: %s\n", dir)
 }

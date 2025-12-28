@@ -10,8 +10,6 @@ go mod download
 go run main.go
 ```
 
-This will download:
-- All 52 playing card SVG files from the Byron Knoll set
-- Two card back SVG files (red and blue)
+This will download all 52 playing card SVG files from the Byron Knoll set (Public Domain).
 
 Images are saved to: `../../src/assets/cards/`
