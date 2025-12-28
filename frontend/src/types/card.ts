@@ -41,5 +41,5 @@ export function createCardId(suit: Suit, rank: Rank): string {
 
 // Helper to get card image filename
 export function getCardImagePath(card: Card): string {
-    return `/src/assets/cards/English_pattern_${card.rank}_of_${card.suit}.svg`;
+    return `/cards/English_pattern_${card.rank}_of_${card.suit}.svg`;
 }
