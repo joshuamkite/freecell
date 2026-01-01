@@ -8,6 +8,7 @@ interface CardProps {
     onDoubleClick?: () => void;
     draggable?: boolean;
     onDragStart?: (e: React.DragEvent) => void;
+    onDrag?: (e: React.DragEvent) => void;
     onDragEnd?: (e: React.DragEvent) => void;
     className?: string;
     style?: React.CSSProperties;
@@ -19,6 +20,7 @@ export function Card({
     onDoubleClick,
     draggable = false,
     onDragStart,
+    onDrag,
     onDragEnd,
     className = '',
     style,
@@ -32,6 +34,7 @@ export function Card({
             onDoubleClick={onDoubleClick}
             draggable={draggable}
             onDragStart={onDragStart}
+            onDrag={onDrag}
             onDragEnd={onDragEnd}
             style={style}
             data-card-id={card.id}
