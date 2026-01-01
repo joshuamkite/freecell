@@ -152,8 +152,8 @@
     cursor: pointer;
     position: relative;
     /* Expand the drop zone to make drops easier */
-    padding: calc(var(--card-height, 140px) * 0.15);
-    margin: calc(var(--card-height, 140px) * -0.15);
+    padding: calc(var(--card-height, 140px) * 0.3);
+    margin: calc(var(--card-height, 140px) * -0.3);
 }
 
 .tableau {
@@ -175,8 +175,8 @@
     flex-direction: column;
     align-items: center;
     /* Expand the drop zone with padding to make drops easier */
-    padding: calc(var(--card-height, 140px) * 0.15) 0;
-    margin: calc(var(--card-height, 140px) * -0.15) 0;
+    padding: calc(var(--card-height, 140px) * 0.4) 0;
+    margin: calc(var(--card-height, 140px) * -0.4) 0;
 }
 
 .column-drop-zone:hover {
