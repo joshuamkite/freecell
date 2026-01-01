@@ -3,6 +3,7 @@ import type { GameState } from '../types/gameState';
 import type { Card as CardType } from '../types/card';
 import { getRankValue } from '../types/card';
 import { Card } from './Card';
+import { AnimatedCard } from './AnimatedCard';
 import { VictoryAnimation } from './VictoryAnimation';
 import { LicenseModal } from './LicenseModal';
 import { dealCards, canMoveToTableau, canMoveToFoundation, checkWin } from '../game/freecellLogic';
@@ -60,14 +61,437 @@ export function GameBoard() {
     const [draggedCard, setDraggedCard] = useState<{ card: CardType; location: { type: string; index: number } } | null>(null);
     const [showVictory, setShowVictory] = useState(false);
     const [showLicense, setShowLicense] = useState(false);
-    const autoPlayTimeoutRef = useRef<number | null>(null);
     const revertTimerRef = useRef<number | null>(null);
     const gameBoardRef = useRef<HTMLDivElement>(null);
     const gameAreaRef = useRef<HTMLDivElement>(null);
+    const gameStateRef = useRef<GameState>(gameState);
+
+    // Animation state
+    const [animatingCards, setAnimatingCards] = useState<{
+        cards: CardType[];
+        startPos: { x: number; y: number };
+        endPos: { x: number; y: number };
+        onComplete: () => void;
+    } | null>(null);
+
+    // Keep ref in sync with current state
+    useEffect(() => {
+        gameStateRef.current = gameState;
+    }, [gameState]);
+
+    // Helper function to get card element position
+    const getCardPosition = (cardId: string): { x: number; y: number } | null => {
+        const element = document.querySelector(`[data-card-id="${cardId}"]`) as HTMLElement;
+        if (!element) return null;
+
+        const rect = element.getBoundingClientRect();
+        return {
+            x: rect.left,
+            y: rect.top
+        };
+    };
+
+    // Helper to get the destination element position (uses current DOM state, not future state)
+    const getDestinationPosition = (
+        toPile: 'tableau' | 'freecell' | 'foundation',
+        toIndex: number
+    ): { x: number; y: number } | null => {
+        if (toPile === 'foundation') {
+            // Find the foundation cell
+            const foundationCells = document.querySelectorAll('.foundation-hearts, .foundation-diamonds, .foundation-clubs, .foundation-spades');
+            const targetCell = foundationCells[toIndex] as HTMLElement;
+            if (!targetCell) return null;
+
+            const rect = targetCell.getBoundingClientRect();
+            return { x: rect.left, y: rect.top };
+        } else if (toPile === 'freecell') {
+            // Find the free cell
+            const freeCells = document.querySelectorAll('.free-cells .cell');
+            const targetCell = freeCells[toIndex] as HTMLElement;
+            if (!targetCell) return null;
+
+            const rect = targetCell.getBoundingClientRect();
+            return { x: rect.left, y: rect.top };
+        } else {
+            // Tableau column - find the current last card in DOM
+            const tableauColumns = document.querySelectorAll('.tableau-column');
+            const targetColumn = tableauColumns[toIndex] as HTMLElement;
+            if (!targetColumn) return null;
+
+            // Look for cards in this column
+            const cards = targetColumn.querySelectorAll('.card');
+            if (cards.length > 0) {
+                // Get the last card's position
+                const lastCard = cards[cards.length - 1] as HTMLElement;
+                const rect = lastCard.getBoundingClientRect();
+
+                // Calculate the position for the new card (below the last one)
+                const cardHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height') || '140');
+                return {
+                    x: rect.left,
+                    y: rect.top + cardHeight * 0.25 // 75% overlap means 25% visible
+                };
+            } else {
+                // Empty column - get the placeholder position
+                const placeholder = targetColumn.querySelector('.card-placeholder') as HTMLElement;
+                if (!placeholder) return null;
+
+                const rect = placeholder.getBoundingClientRect();
+                return { x: rect.left, y: rect.top };
+            }
+        }
+    };
+
+    // Perform an animated move
+    const animateMove = (
+        fromPile: 'tableau' | 'freecell' | 'foundation',
+        fromIndex: number,
+        toPile: 'tableau' | 'freecell' | 'foundation',
+        toIndex: number,
+        onAnimationComplete?: () => void,
+        sourceState?: GameState  // Optional source state for auto-play
+    ) => {
+        const stateToUse = sourceState || gameState;
+
+        // Get the card being moved
+        let cardToMove: CardType;
+        let cardId: string;
+
+        if (fromPile === 'freecell') {
+            const card = stateToUse.freeCells[fromIndex];
+            if (!card) {
+                onAnimationComplete?.();
+                return;
+            }
+            cardToMove = card;
+            cardId = card.id;
+        } else if (fromPile === 'foundation') {
+            const suit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof stateToUse.foundations;
+            const foundation = stateToUse.foundations[suit];
+            if (foundation.length === 0) {
+                onAnimationComplete?.();
+                return;
+            }
+            cardToMove = foundation[foundation.length - 1];
+            cardId = cardToMove.id;
+        } else {
+            // Tableau
+            const column = stateToUse.tableau[fromIndex];
+            if (column.length === 0) {
+                onAnimationComplete?.();
+                return;
+            }
+            cardToMove = column[column.length - 1];
+            cardId = cardToMove.id;
+        }
+
+        // Get start position
+        const startPos = getCardPosition(cardId);
+        if (!startPos) {
+            // Can't animate - just do the move immediately
+            const newState = performMove(gameState, fromPile, fromIndex, toPile, toIndex);
+            if (newState) {
+                updateGameStateImmediate(newState);
+            }
+            onAnimationComplete?.();
+            return;
+        }
+
+        // Perform the move to get the new state
+        const newState = performMove(stateToUse, fromPile, fromIndex, toPile, toIndex);
+        if (!newState) {
+            onAnimationComplete?.();
+            return; // Invalid move
+        }
+
+        // Get end position based on current DOM state
+        const endPos = getDestinationPosition(toPile, toIndex);
+        if (!endPos) {
+            // Can't get end position - just update immediately
+            updateGameStateImmediate(newState);
+            onAnimationComplete?.();
+            return;
+        }
+
+        // Start the animation
+        setAnimatingCards({
+            cards: [cardToMove],
+            startPos,
+            endPos,
+            onComplete: () => {
+                setAnimatingCards(null);
+                updateGameStateImmediate(newState);
+                onAnimationComplete?.();
+            }
+        });
+    };
+
+    // Perform a move without animation (returns new state or null if invalid)
+    const performMove = (
+        state: GameState,
+        fromPile: 'tableau' | 'freecell' | 'foundation',
+        fromIndex: number,
+        toPile: 'tableau' | 'freecell' | 'foundation',
+        toIndex: number
+    ): GameState | null => {
+        // Deep copy the game state
+        const newState: GameState = {
+            ...state,
+            tableau: state.tableau.map(col => [...col]),
+            freeCells: [...state.freeCells],
+            foundations: {
+                hearts: [...state.foundations.hearts],
+                diamonds: [...state.foundations.diamonds],
+                clubs: [...state.foundations.clubs],
+                spades: [...state.foundations.spades],
+            },
+        };
+
+        // Get the card being moved
+        let cardToMove: CardType | null = null;
+
+        if (fromPile === 'freecell') {
+            cardToMove = newState.freeCells[fromIndex];
+            if (!cardToMove) return null;
+        } else if (fromPile === 'foundation') {
+            const suit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
+            const foundation = newState.foundations[suit];
+            if (foundation.length === 0) return null;
+            cardToMove = foundation[foundation.length - 1];
+        } else {
+            // Tableau
+            const column = newState.tableau[fromIndex];
+            if (column.length === 0) return null;
+            cardToMove = column[column.length - 1];
+        }
+
+        if (!cardToMove) return null;
+
+        // Check if move is valid
+        let isValid = false;
+
+        if (toPile === 'foundation') {
+            const suit = ['hearts', 'diamonds', 'clubs', 'spades'][toIndex] as keyof typeof newState.foundations;
+            isValid = canMoveToFoundation(cardToMove, newState.foundations[suit]);
+            if (isValid) {
+                // Remove from source
+                if (fromPile === 'freecell') {
+                    newState.freeCells[fromIndex] = null;
+                } else if (fromPile === 'foundation') {
+                    const fromSuit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
+                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -1);
+                } else {
+                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -1);
+                }
+                // Add to foundation
+                newState.foundations[suit] = [...newState.foundations[suit], cardToMove];
+            }
+        } else if (toPile === 'tableau') {
+            isValid = canMoveToTableau(cardToMove, newState.tableau[toIndex]);
+            if (isValid) {
+                // Remove from source
+                if (fromPile === 'freecell') {
+                    newState.freeCells[fromIndex] = null;
+                } else if (fromPile === 'foundation') {
+                    const fromSuit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
+                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -1);
+                } else {
+                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -1);
+                }
+                // Add to tableau
+                newState.tableau[toIndex] = [...newState.tableau[toIndex], cardToMove];
+            }
+        } else if (toPile === 'freecell') {
+            isValid = newState.freeCells[toIndex] === null;
+            if (isValid) {
+                // Remove from source
+                if (fromPile === 'freecell') {
+                    newState.freeCells[fromIndex] = null;
+                } else if (fromPile === 'foundation') {
+                    const fromSuit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
+                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -1);
+                } else {
+                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -1);
+                }
+                // Add to free cell
+                newState.freeCells[toIndex] = cardToMove;
+            }
+        }
+
+        return isValid ? newState : null;
+    };
+
+    // Helper to detect which card moved between states
+    const detectAutoPlayMove = (oldState: GameState, newState: GameState): {
+        fromPile: 'tableau' | 'freecell';
+        fromIndex: number;
+        toPile: 'foundation';
+        toIndex: number;
+    } | null => {
+        // Check free cells
+        for (let i = 0; i < oldState.freeCells.length; i++) {
+            const oldCard = oldState.freeCells[i];
+            const newCard = newState.freeCells[i];
+            if (oldCard && !newCard) {
+                // A card was removed from this free cell
+                // Find which foundation gained it
+                const suits = ['hearts', 'diamonds', 'clubs', 'spades'] as const;
+                for (let j = 0; j < suits.length; j++) {
+                    const suit = suits[j];
+                    if (newState.foundations[suit].length > oldState.foundations[suit].length) {
+                        const addedCard = newState.foundations[suit][newState.foundations[suit].length - 1];
+                        if (addedCard.id === oldCard.id) {
+                            return {
+                                fromPile: 'freecell',
+                                fromIndex: i,
+                                toPile: 'foundation',
+                                toIndex: j
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check tableau columns
+        for (let col = 0; col < oldState.tableau.length; col++) {
+            const oldColumn = oldState.tableau[col];
+            const newColumn = newState.tableau[col];
+
+            if (oldColumn.length > newColumn.length) {
+                const movedCard = oldColumn[oldColumn.length - 1];
+                // Find which foundation gained this card
+                const suits = ['hearts', 'diamonds', 'clubs', 'spades'] as const;
+                for (let j = 0; j < suits.length; j++) {
+                    const suit = suits[j];
+                    if (newState.foundations[suit].length > oldState.foundations[suit].length) {
+                        const addedCard = newState.foundations[suit][newState.foundations[suit].length - 1];
+                        if (addedCard.id === movedCard.id) {
+                            return {
+                                fromPile: 'tableau',
+                                fromIndex: col,
+                                toPile: 'foundation',
+                                toIndex: j
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    };
+
+    const updateGameStateImmediate = (newState: GameState, skipAutoPlay: boolean = false) => {
+        dispatch({ type: 'UPDATE_STATE', newState });
+
+        // Auto-play: automatically move safe cards to foundations one at a time
+        if (!skipAutoPlay && !checkWin(newState)) {
+            // Recursive function to move cards one at a time with delays
+            const autoPlayRecursive = () => {
+                setTimeout(() => {
+                    // Get current state from the ref (always latest)
+                    const currentState = gameStateRef.current;
+                    const nextState = tryAutoPlaySingleCard(currentState);
+                    if (nextState !== currentState) {
+                        // A card was moved, detect which one
+                        const move = detectAutoPlayMove(currentState, nextState);
+                        if (move) {
+                            // Animate from current DOM state to new state
+                            animateMove(
+                                move.fromPile,
+                                move.fromIndex,
+                                move.toPile,
+                                move.toIndex,
+                                () => {
+                                    // Continue auto-play after animation
+                                    autoPlayRecursive();
+                                },
+                                currentState  // Pass the current state so it knows which cards to look for
+                            );
+                        } else {
+                            // Couldn't detect move, just update state
+                            dispatch({ type: 'UPDATE_STATE', newState: nextState });
+                            autoPlayRecursive();
+                        }
+                    }
+                    // If no card was moved, stop recursing
+                }, 700);
+            };
+
+            autoPlayRecursive();
+        }
+    };
+
+    // Try to auto-play a single card (returns new state if moved, or same state if not)
+    const tryAutoPlaySingleCard = (state: GameState): GameState => {
+        // Deep copy the game state
+        const newState: GameState = {
+            ...state,
+            tableau: state.tableau.map(col => [...col]),
+            freeCells: [...state.freeCells],
+            foundations: {
+                hearts: [...state.foundations.hearts],
+                diamonds: [...state.foundations.diamonds],
+                clubs: [...state.foundations.clubs],
+                spades: [...state.foundations.spades],
+            },
+        };
+
+        // Helper: Get the minimum rank in opposite color foundations
+        const getMinOppositeColorRank = (suit: string): number => {
+            const isRed = suit === 'hearts' || suit === 'diamonds';
+            const oppositeSuits = isRed
+                ? ['clubs', 'spades']
+                : ['hearts', 'diamonds'];
+
+            return Math.min(
+                newState.foundations[oppositeSuits[0] as keyof typeof newState.foundations].length,
+                newState.foundations[oppositeSuits[1] as keyof typeof newState.foundations].length
+            );
+        };
+
+        // A card is safe to auto-move if its rank is at most 2 higher than
+        // the minimum rank of opposite color foundations
+        const isSafeToAutoMove = (card: CardType): boolean => {
+            const cardRankValue = getRankValue(card.rank);
+            const currentFoundationRank = newState.foundations[card.suit].length;
+            const minOppositeRank = getMinOppositeColorRank(card.suit);
+            return cardRankValue === currentFoundationRank + 1 &&
+                cardRankValue <= minOppositeRank + 2;
+        };
+
+        // Try to move from free cells first
+        for (let i = 0; i < newState.freeCells.length; i++) {
+            const card = newState.freeCells[i];
+            if (card && canMoveToFoundation(card, newState.foundations[card.suit]) && isSafeToAutoMove(card)) {
+                newState.freeCells[i] = null;
+                newState.foundations[card.suit] = [...newState.foundations[card.suit], card];
+                return newState;
+            }
+        }
+
+        // Try to move from tableau columns
+        for (let i = 0; i < newState.tableau.length; i++) {
+            const column = newState.tableau[i];
+            if (column.length > 0) {
+                const card = column[column.length - 1];
+                if (canMoveToFoundation(card, newState.foundations[card.suit]) && isSafeToAutoMove(card)) {
+                    const newColumn = [...column];
+                    newColumn.pop();
+                    newState.tableau[i] = newColumn;
+                    newState.foundations[card.suit] = [...newState.foundations[card.suit], card];
+                    return newState;
+                }
+            }
+        }
+
+        return state; // No move made
+    };
 
     // Helper to update game state and save to history
     const updateGameState = (newState: GameState) => {
-        dispatch({ type: 'UPDATE_STATE', newState });
+        updateGameStateImmediate(newState);
     };
 
     const newGame = (num: number, skipWarning: boolean = false) => {
@@ -170,90 +594,6 @@ export function GameBoard() {
         }
     }, [gameState]);
 
-    // Auto-play: automatically move cards to foundations when safe
-    useEffect(() => {
-        if (autoPlayTimeoutRef.current) {
-            clearTimeout(autoPlayTimeoutRef.current);
-        }
-
-        autoPlayTimeoutRef.current = window.setTimeout(() => {
-            // Deep copy the game state
-            const newState: GameState = {
-                ...gameState,
-                tableau: gameState.tableau.map(col => [...col]),
-                freeCells: [...gameState.freeCells],
-                foundations: {
-                    hearts: [...gameState.foundations.hearts],
-                    diamonds: [...gameState.foundations.diamonds],
-                    clubs: [...gameState.foundations.clubs],
-                    spades: [...gameState.foundations.spades],
-                },
-            };
-            let moved = false;
-
-            // Helper: Get the minimum rank in opposite color foundations
-            const getMinOppositeColorRank = (suit: string): number => {
-                const isRed = suit === 'hearts' || suit === 'diamonds';
-                const oppositeSuits = isRed
-                    ? ['clubs', 'spades']
-                    : ['hearts', 'diamonds'];
-
-                return Math.min(
-                    newState.foundations[oppositeSuits[0] as keyof typeof newState.foundations].length,
-                    newState.foundations[oppositeSuits[1] as keyof typeof newState.foundations].length
-                );
-            };
-
-            // A card is safe to auto-move if its rank is at most 2 higher than
-            // the minimum rank of opposite color foundations
-            const isSafeToAutoMove = (card: CardType): boolean => {
-                const cardRankValue = getRankValue(card.rank);
-                const currentFoundationRank = newState.foundations[card.suit].length;
-                const minOppositeRank = getMinOppositeColorRank(card.suit);
-                return cardRankValue === currentFoundationRank + 1 &&
-                    cardRankValue <= minOppositeRank + 2;
-            };
-
-            // Try to move from free cells first
-            for (let i = 0; i < newState.freeCells.length && !moved; i++) {
-                const card = newState.freeCells[i];
-                if (card && canMoveToFoundation(card, newState.foundations[card.suit]) && isSafeToAutoMove(card)) {
-                    newState.freeCells[i] = null;
-                    newState.foundations[card.suit] = [...newState.foundations[card.suit], card];
-                    moved = true;
-                    break;
-                }
-            }
-
-            // Try to move from tableau columns
-            if (!moved) {
-                for (let i = 0; i < newState.tableau.length && !moved; i++) {
-                    const column = newState.tableau[i];
-                    if (column.length > 0) {
-                        const card = column[column.length - 1];
-                        if (canMoveToFoundation(card, newState.foundations[card.suit]) && isSafeToAutoMove(card)) {
-                            const newColumn = [...column];
-                            newColumn.pop();
-                            newState.tableau[i] = newColumn;
-                            newState.foundations[card.suit] = [...newState.foundations[card.suit], card];
-                            moved = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (moved) {
-                updateGameState(newState);
-            }
-        }, 800); // Delay to make auto-play moves visible
-
-        return () => {
-            if (autoPlayTimeoutRef.current) {
-                clearTimeout(autoPlayTimeoutRef.current);
-            }
-        };
-    }, [gameState]);
 
     // Calculate and set card dimensions based on game area width
     useEffect(() => {
@@ -699,6 +1039,15 @@ export function GameBoard() {
 
             {showLicense && (
                 <LicenseModal onClose={() => setShowLicense(false)} />
+            )}
+
+            {animatingCards && (
+                <AnimatedCard
+                    cards={animatingCards.cards}
+                    startPos={animatingCards.startPos}
+                    endPos={animatingCards.endPos}
+                    onComplete={animatingCards.onComplete}
+                />
             )}
         </div>
     );

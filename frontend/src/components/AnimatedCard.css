@@ -1,0 +1,9 @@
+.animated-card-container {
+    will-change: transform;
+    pointer-events: none;
+}
+
+.animated-card-container .card {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+}
