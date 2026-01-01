@@ -164,11 +164,11 @@
 }
 
 .tableau-column {
-    min-height: calc(var(--card-height, 140px) * 3.5);
+    min-height: calc(var(--card-height, 140px) * 2.75);
 }
 
 .column-drop-zone {
-    min-height: calc(var(--card-height, 140px) * 3.5);
+    min-height: calc(var(--card-height, 140px) * 2.75);
     border-radius: calc(var(--card-width, 100px) * 0.06);
     transition: background-color 0.2s;
     display: flex;
@@ -179,9 +179,6 @@
     margin: calc(var(--card-height, 140px) * -0.4) 0;
 }
 
-.column-drop-zone:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
 
 /* Foundation suit indicators - faint icons in background */
 .foundation-hearts .card-placeholder::before,
@@ -220,8 +217,8 @@
 /* Footer */
 .game-footer {
     max-width: var(--max-game-width, 80%);
-    margin: 40px auto 0;
-    padding: 20px;
+    margin: 25px auto 0;
+    padding: 10px;
     text-align: center;
 }
 
@@ -314,7 +311,7 @@
     }
 
     .game-footer {
-        margin-top: 20px;
+        margin-top: var(--card-height);
         padding: 15px;
         max-width: 100%;
     }
@@ -378,7 +375,7 @@
     }
 
     .game-footer {
-        margin-top: 15px;
+        margin-top: var(--card-height);
         padding: 10px;
     }
 
@@ -444,6 +441,7 @@
 
     .game-footer {
         max-width: 100%;
+        margin-top: var(--card-height);
     }
 
     .top-area,
