@@ -862,6 +862,11 @@ export function GameBoard() {
         }
     };
 
+    const isCardDragging = (card: CardType): boolean => {
+        if (!draggedCard) return false;
+        return draggedCard.card.id === card.id;
+    };
+
     return (
         <div className="game-board" ref={gameBoardRef}>
             <div className="game-header">
@@ -927,7 +932,7 @@ export function GameBoard() {
                                             onDragStart={(e) => handleDragStart(e, card, { type: 'freecell', index })}
                                             onDragEnd={handleDragEnd}
                                             onDoubleClick={() => handleDoubleClick(card, { type: 'freecell', index })}
-                                            className={selectedCard?.card.id === card.id ? 'selected' : ''}
+                                            className={`${selectedCard?.card.id === card.id ? 'selected' : ''} ${isCardDragging(card) ? 'dragging' : ''}`}
                                         />
                                     ) : (
                                         <div className="card-placeholder"></div>
@@ -963,7 +968,7 @@ export function GameBoard() {
                                                 onDragStart={(e) => handleDragStart(e, topCard, { type: 'foundation', index })}
                                                 onDragEnd={handleDragEnd}
                                                 onDoubleClick={() => handleDoubleClick(topCard, { type: 'foundation', index })}
-                                                className={selectedCard?.card.id === topCard.id ? 'selected' : ''}
+                                                className={`${selectedCard?.card.id === topCard.id ? 'selected' : ''} ${isCardDragging(topCard) ? 'dragging' : ''}`}
                                             />
                                         ) : (
                                             <div className="card-placeholder"></div>
@@ -995,7 +1000,7 @@ export function GameBoard() {
                                         onDragEnd={handleDragEnd}
                                         onClick={() => cardIndex === column.length - 1 && handleCardClick(card, { type: 'tableau', index: columnIndex })}
                                         onDoubleClick={() => cardIndex === column.length - 1 && handleDoubleClick(card, { type: 'tableau', index: columnIndex })}
-                                        className={selectedCard?.card.id === card.id ? 'selected' : ''}
+                                        className={`${selectedCard?.card.id === card.id ? 'selected' : ''} ${isCardDragging(card) ? 'dragging' : ''}`}
                                         style={{
                                             // Tableau card overlap: -0.75 = 75% overlap. Adjust value between 0 (no overlap) and -1 (100% overlap)
                                             marginTop: cardIndex === 0 ? '0' : `calc(var(--card-height, 140px) * -0.75)`
