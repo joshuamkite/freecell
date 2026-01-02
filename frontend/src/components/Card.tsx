@@ -12,6 +12,7 @@ interface CardProps {
     onDragEnd?: (e: React.DragEvent) => void;
     className?: string;
     style?: React.CSSProperties;
+    cardRef?: (element: HTMLDivElement | null) => void;
 }
 
 export function Card({
@@ -24,11 +25,13 @@ export function Card({
     onDragEnd,
     className = '',
     style,
+    cardRef,
 }: CardProps) {
     const imagePath = getCardImagePath(card);
 
     return (
         <div
+            ref={cardRef}
             className={`card ${className}`}
             onClick={onClick}
             onDoubleClick={onDoubleClick}
