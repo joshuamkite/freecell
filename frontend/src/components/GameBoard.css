@@ -9,6 +9,11 @@
     --board-padding: 20px;
     /* Desktop game width: This is overwritten by JavaScript. Adjust 'gameWidthPercent' in GameBoard.tsx instead. */
     --max-game-width: 65%;
+    /* Prevent text selection during drag operations */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .game-header {
@@ -123,6 +128,9 @@
     width: 100%;
     max-width: var(--max-game-width, 80%);
     margin: 0 auto;
+    /* Prevent text selection during drag operations */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .top-area {
@@ -132,6 +140,9 @@
     margin-bottom: calc(var(--card-gap, 10px) * 4);
     width: 100%;
     align-items: start;
+    /* Prevent text selection during drag operations */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .free-cells {
@@ -154,6 +165,9 @@
     /* Expand the drop zone to make drops easier */
     padding: calc(var(--card-height, 140px) * 0.3);
     margin: calc(var(--card-height, 140px) * -0.3);
+    /* Prevent text selection during drag operations */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .tableau {
@@ -161,10 +175,16 @@
     grid-template-columns: repeat(8, var(--card-width, 100px));
     gap: var(--card-gap, 10px);
     width: 100%;
+    /* Prevent text selection during drag operations */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .tableau-column {
     min-height: calc(var(--card-height, 140px) * 2.75);
+    /* Prevent text selection during drag operations */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .column-drop-zone {
@@ -177,6 +197,9 @@
     /* Expand the drop zone with padding to make drops easier */
     padding: calc(var(--card-height, 140px) * 0.4) 0;
     margin: calc(var(--card-height, 140px) * -0.4) 0;
+    /* Prevent text selection during drag operations */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 
