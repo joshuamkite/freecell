@@ -127,12 +127,20 @@ export function GameBoard() {
     // Click and double-click handlers (not extracted into hooks)
     const handleCardClick = (card: CardType, location: { type: string; index: number }) => {
         if (selectedCard) {
-            // Try to move selected card to clicked location
+            // Allow clicking on any card in a column to move selected card there
+            // This is especially important for mobile where cards overlap heavily
             tryMove(selectedCard, location);
             setSelectedCard(null);
         } else {
-            // Select this card
-            setSelectedCard({ card, location });
+            // Select this card (but for tableau, only allow selecting the top card)
+            if (location.type === 'tableau') {
+                const column = gameState.tableau[location.index];
+                if (column[column.length - LAST_ITEM_INDEX_OFFSET]?.id === card.id) {
+                    setSelectedCard({ card, location });
+                }
+            } else {
+                setSelectedCard({ card, location });
+            }
         }
     };
 
@@ -337,7 +345,7 @@ export function GameBoard() {
                                         draggable={cardIndex === column.length - LAST_ITEM_INDEX_OFFSET}
                                         onDragStart={(e) => handleDragStart(e, card, { type: 'tableau', index: columnIndex })}
                                         onDragEnd={handleDragEnd}
-                                        onClick={() => cardIndex === column.length - LAST_ITEM_INDEX_OFFSET && handleCardClick(card, { type: 'tableau', index: columnIndex })}
+                                        onClick={() => handleCardClick(card, { type: 'tableau', index: columnIndex })}
                                         onDoubleClick={() => cardIndex === column.length - LAST_ITEM_INDEX_OFFSET && handleDoubleClick(card, { type: 'tableau', index: columnIndex })}
                                         className={`${selectedCard?.card.id === card.id ? 'selected' : ''} ${isCardDragging(card) ? 'dragging' : ''}`}
                                         style={{
