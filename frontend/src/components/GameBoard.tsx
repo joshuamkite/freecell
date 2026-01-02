@@ -7,6 +7,29 @@ import { AnimatedCard } from './AnimatedCard';
 import { VictoryAnimation } from './VictoryAnimation';
 import { LicenseModal } from './LicenseModal';
 import { dealCards, canMoveToTableau, canMoveToFoundation, checkWin } from '../game/freecellLogic';
+import {
+    MAX_GAME_NUMBER,
+    MIN_GAME_NUMBER,
+    GAME_NUMBER_REVERT_TIMER_MS,
+    TABLEAU_COLUMN_COUNT,
+    TABLEAU_GAPS,
+    BOARD_PADDING_DESKTOP_PX,
+    BOARD_PADDING_TABLET_PX,
+    BOARD_PADDING_MOBILE_PX,
+    CARD_GAP_DESKTOP_PX,
+    CARD_GAP_TABLET_PX,
+    CARD_GAP_MOBILE_PX,
+    GAME_WIDTH_PERCENT,
+    CARD_MIN_WIDTH_PX,
+    CARD_ASPECT_RATIO,
+    TABLEAU_CARD_OVERLAP,
+    MOBILE_BREAKPOINT_PX,
+    TABLET_BREAKPOINT_PX,
+    AUTO_PLAY_DELAY_MS,
+    VICTORY_ANIMATION_DELAY_MS,
+    AUTO_MOVE_SAFE_RANK_OFFSET,
+    LAST_ITEM_INDEX_OFFSET,
+} from '../constants';
 import './GameBoard.css';
 
 // Reducer for managing game state and history together
@@ -30,8 +53,8 @@ function gameReducer(state: GameReducerState, action: GameAction): GameReducerSt
         case 'UNDO':
             if (state.history.length === 0) return state;
             return {
-                current: state.history[state.history.length - 1],
-                history: state.history.slice(0, -1),
+                current: state.history[state.history.length - LAST_ITEM_INDEX_OFFSET],
+                history: state.history.slice(0, -LAST_ITEM_INDEX_OFFSET),
             };
         case 'NEW_GAME':
             return {
@@ -45,7 +68,7 @@ function gameReducer(state: GameReducerState, action: GameAction): GameReducerSt
 
 export function GameBoard() {
     // Current game number (the actual game being played)
-    const [currentGameNumber, setCurrentGameNumber] = useState(() => Math.floor(Math.random() * 1000000) + 1);
+    const [currentGameNumber, setCurrentGameNumber] = useState(() => Math.floor(Math.random() * MAX_GAME_NUMBER) + MIN_GAME_NUMBER);
 
     // Input value (what the user has typed)
     const [inputValue, setInputValue] = useState(() => currentGameNumber.toString());
@@ -122,14 +145,14 @@ export function GameBoard() {
             const cards = targetColumn.querySelectorAll('.card');
             if (cards.length > 0) {
                 // Get the last card's position
-                const lastCard = cards[cards.length - 1] as HTMLElement;
+                const lastCard = cards[cards.length - LAST_ITEM_INDEX_OFFSET] as HTMLElement;
                 const rect = lastCard.getBoundingClientRect();
 
                 // Calculate the position for the new card (below the last one)
                 const cardHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height') || '140');
                 return {
                     x: rect.left,
-                    y: rect.top + cardHeight * 0.25 // 75% overlap means 25% visible
+                    y: rect.top + cardHeight * (1 - TABLEAU_CARD_OVERLAP)
                 };
             } else {
                 // Empty column - get the placeholder position
@@ -172,7 +195,7 @@ export function GameBoard() {
                 onAnimationComplete?.();
                 return;
             }
-            cardToMove = foundation[foundation.length - 1];
+            cardToMove = foundation[foundation.length - LAST_ITEM_INDEX_OFFSET];
             cardId = cardToMove.id;
         } else {
             // Tableau
@@ -181,7 +204,7 @@ export function GameBoard() {
                 onAnimationComplete?.();
                 return;
             }
-            cardToMove = column[column.length - 1];
+            cardToMove = column[column.length - LAST_ITEM_INDEX_OFFSET];
             cardId = cardToMove.id;
         }
 
@@ -257,12 +280,12 @@ export function GameBoard() {
             const suit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
             const foundation = newState.foundations[suit];
             if (foundation.length === 0) return null;
-            cardToMove = foundation[foundation.length - 1];
+            cardToMove = foundation[foundation.length - LAST_ITEM_INDEX_OFFSET];
         } else {
             // Tableau
             const column = newState.tableau[fromIndex];
             if (column.length === 0) return null;
-            cardToMove = column[column.length - 1];
+            cardToMove = column[column.length - LAST_ITEM_INDEX_OFFSET];
         }
 
         if (!cardToMove) return null;
@@ -279,9 +302,9 @@ export function GameBoard() {
                     newState.freeCells[fromIndex] = null;
                 } else if (fromPile === 'foundation') {
                     const fromSuit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
-                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -1);
+                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -LAST_ITEM_INDEX_OFFSET);
                 } else {
-                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -1);
+                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -LAST_ITEM_INDEX_OFFSET);
                 }
                 // Add to foundation
                 newState.foundations[suit] = [...newState.foundations[suit], cardToMove];
@@ -294,9 +317,9 @@ export function GameBoard() {
                     newState.freeCells[fromIndex] = null;
                 } else if (fromPile === 'foundation') {
                     const fromSuit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
-                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -1);
+                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -LAST_ITEM_INDEX_OFFSET);
                 } else {
-                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -1);
+                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -LAST_ITEM_INDEX_OFFSET);
                 }
                 // Add to tableau
                 newState.tableau[toIndex] = [...newState.tableau[toIndex], cardToMove];
@@ -309,9 +332,9 @@ export function GameBoard() {
                     newState.freeCells[fromIndex] = null;
                 } else if (fromPile === 'foundation') {
                     const fromSuit = ['hearts', 'diamonds', 'clubs', 'spades'][fromIndex] as keyof typeof newState.foundations;
-                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -1);
+                    newState.foundations[fromSuit] = newState.foundations[fromSuit].slice(0, -LAST_ITEM_INDEX_OFFSET);
                 } else {
-                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -1);
+                    newState.tableau[fromIndex] = newState.tableau[fromIndex].slice(0, -LAST_ITEM_INDEX_OFFSET);
                 }
                 // Add to free cell
                 newState.freeCells[toIndex] = cardToMove;
@@ -339,7 +362,7 @@ export function GameBoard() {
                 for (let j = 0; j < suits.length; j++) {
                     const suit = suits[j];
                     if (newState.foundations[suit].length > oldState.foundations[suit].length) {
-                        const addedCard = newState.foundations[suit][newState.foundations[suit].length - 1];
+                        const addedCard = newState.foundations[suit][newState.foundations[suit].length - LAST_ITEM_INDEX_OFFSET];
                         if (addedCard.id === oldCard.id) {
                             return {
                                 fromPile: 'freecell',
@@ -359,13 +382,13 @@ export function GameBoard() {
             const newColumn = newState.tableau[col];
 
             if (oldColumn.length > newColumn.length) {
-                const movedCard = oldColumn[oldColumn.length - 1];
+                const movedCard = oldColumn[oldColumn.length - LAST_ITEM_INDEX_OFFSET];
                 // Find which foundation gained this card
                 const suits = ['hearts', 'diamonds', 'clubs', 'spades'] as const;
                 for (let j = 0; j < suits.length; j++) {
                     const suit = suits[j];
                     if (newState.foundations[suit].length > oldState.foundations[suit].length) {
-                        const addedCard = newState.foundations[suit][newState.foundations[suit].length - 1];
+                        const addedCard = newState.foundations[suit][newState.foundations[suit].length - LAST_ITEM_INDEX_OFFSET];
                         if (addedCard.id === movedCard.id) {
                             return {
                                 fromPile: 'tableau',
@@ -416,7 +439,7 @@ export function GameBoard() {
                         }
                     }
                     // If no card was moved, stop recursing
-                }, 700);
+                }, AUTO_PLAY_DELAY_MS);
             };
 
             autoPlayRecursive();
@@ -457,8 +480,8 @@ export function GameBoard() {
             const cardRankValue = getRankValue(card.rank);
             const currentFoundationRank = newState.foundations[card.suit].length;
             const minOppositeRank = getMinOppositeColorRank(card.suit);
-            return cardRankValue === currentFoundationRank + 1 &&
-                cardRankValue <= minOppositeRank + 2;
+            return cardRankValue === currentFoundationRank + MIN_GAME_NUMBER &&
+                cardRankValue <= minOppositeRank + AUTO_MOVE_SAFE_RANK_OFFSET;
         };
 
         // Try to move from free cells first
@@ -475,7 +498,7 @@ export function GameBoard() {
         for (let i = 0; i < newState.tableau.length; i++) {
             const column = newState.tableau[i];
             if (column.length > 0) {
-                const card = column[column.length - 1];
+                const card = column[column.length - LAST_ITEM_INDEX_OFFSET];
                 if (canMoveToFoundation(card, newState.foundations[card.suit]) && isSafeToAutoMove(card)) {
                     const newColumn = [...column];
                     newColumn.pop();
@@ -527,8 +550,8 @@ export function GameBoard() {
             revertTimerRef.current = null;
         }
 
-        const num = parseInt(value) || 1;
-        const clampedNum = Math.max(1, Math.min(1000000, num));
+        const num = parseInt(value) || MIN_GAME_NUMBER;
+        const clampedNum = Math.max(MIN_GAME_NUMBER, Math.min(MAX_GAME_NUMBER, num));
 
         // Only start timer if the input differs from current game
         if (clampedNum !== currentGameNumber) {
@@ -536,7 +559,7 @@ export function GameBoard() {
             revertTimerRef.current = window.setTimeout(() => {
                 setInputValue(currentGameNumber.toString());
                 revertTimerRef.current = null;
-            }, 20000);
+            }, GAME_NUMBER_REVERT_TIMER_MS);
         }
     };
 
@@ -550,8 +573,8 @@ export function GameBoard() {
             if (!confirmed) return;
         }
 
-        const num = parseInt(inputValue) || 1;
-        const clampedNum = Math.max(1, Math.min(1000000, num));
+        const num = parseInt(inputValue) || MIN_GAME_NUMBER;
+        const clampedNum = Math.max(MIN_GAME_NUMBER, Math.min(MAX_GAME_NUMBER, num));
         newGame(clampedNum, true); // skipWarning = true since we already confirmed
     };
 
@@ -590,7 +613,7 @@ export function GameBoard() {
         if (checkWin(gameState)) {
             setTimeout(() => {
                 setShowVictory(true);
-            }, 500);
+            }, VICTORY_ANIMATION_DELAY_MS);
         }
     }, [gameState]);
 
@@ -601,40 +624,40 @@ export function GameBoard() {
             if (!gameBoardRef.current || !gameAreaRef.current) return;
 
             // Determine board padding based on screen size (matches CSS media queries)
-            let boardPadding = 20; // Desktop default
-            if (window.innerWidth <= 480) {
-                boardPadding = 5;
-            } else if (window.innerWidth <= 768) {
-                boardPadding = 8;
+            let boardPadding = BOARD_PADDING_DESKTOP_PX; // Desktop default
+            if (window.innerWidth <= MOBILE_BREAKPOINT_PX) {
+                boardPadding = BOARD_PADDING_MOBILE_PX;
+            } else if (window.innerWidth <= TABLET_BREAKPOINT_PX) {
+                boardPadding = BOARD_PADDING_TABLET_PX;
             }
 
             // Desktop game width: Change this value to adjust game width (0.6 = 60%, 0.7 = 70%, 0.8 = 80%)
-            const gameWidthPercent = 0.65;
+            const gameWidthPercent = GAME_WIDTH_PERCENT;
 
             const viewportWidth = window.innerWidth - (boardPadding * 2);
             const availableWidth = viewportWidth * gameWidthPercent;
 
             // Determine gap based on screen size (matches CSS media queries)
-            let cardGap = 10; // Desktop default
-            if (window.innerWidth <= 480) {
-                cardGap = 3;
-            } else if (window.innerWidth <= 768) {
-                cardGap = 5;
+            let cardGap = CARD_GAP_DESKTOP_PX; // Desktop default
+            if (window.innerWidth <= MOBILE_BREAKPOINT_PX) {
+                cardGap = CARD_GAP_MOBILE_PX;
+            } else if (window.innerWidth <= TABLET_BREAKPOINT_PX) {
+                cardGap = CARD_GAP_TABLET_PX;
             }
 
             // FreeCell: 8 columns
-            const tableauItems = 8;
-            const tableauGaps = tableauItems - 1;
+            const tableauItems = TABLEAU_COLUMN_COUNT;
+            const tableauGaps = TABLEAU_GAPS;
 
             // Calculate card width to fill available space
             let cardWidth = (availableWidth - (tableauGaps * cardGap)) / tableauItems;
 
             // Set reasonable bounds (minimum 60px)
-            const minWidth = 60;
+            const minWidth = CARD_MIN_WIDTH_PX;
             cardWidth = Math.max(minWidth, cardWidth);
 
             // Maintain 5:7 aspect ratio (width:height)
-            const cardHeight = cardWidth * 1.4;
+            const cardHeight = cardWidth * CARD_ASPECT_RATIO;
 
             // Set CSS custom properties
             gameBoardRef.current.style.setProperty('--card-width', `${cardWidth}px`);
@@ -686,7 +709,7 @@ export function GameBoard() {
         if (canMoveToFoundation(card, newState.foundations[card.suit])) {
             if (location.type === 'tableau') {
                 const column = [...newState.tableau[location.index]];
-                if (column[column.length - 1]?.id === card.id) {
+                if (column[column.length - LAST_ITEM_INDEX_OFFSET]?.id === card.id) {
                     column.pop();
                     newState.tableau[location.index] = column;
                     newState.foundations[card.suit] = [...newState.foundations[card.suit], card];
@@ -704,7 +727,7 @@ export function GameBoard() {
         // If couldn't move to foundation and from tableau, try moving to free cell
         if (!moved && location.type === 'tableau') {
             const column = [...newState.tableau[location.index]];
-            if (column[column.length - 1]?.id === card.id) {
+            if (column[column.length - LAST_ITEM_INDEX_OFFSET]?.id === card.id) {
                 // Find first empty free cell
                 const emptyFreeCellIndex = newState.freeCells.findIndex(cell => cell === null);
                 if (emptyFreeCellIndex !== -1) {
@@ -777,7 +800,7 @@ export function GameBoard() {
                 // Remove from source
                 if (from.location.type === 'tableau') {
                     const sourceColumn = [...newState.tableau[from.location.index]];
-                    if (sourceColumn[sourceColumn.length - 1]?.id === from.card.id) {
+                    if (sourceColumn[sourceColumn.length - LAST_ITEM_INDEX_OFFSET]?.id === from.card.id) {
                         sourceColumn.pop();
                         newState.tableau[from.location.index] = sourceColumn;
                         moved = true;
@@ -790,7 +813,7 @@ export function GameBoard() {
                 } else if (from.location.type === 'foundation') {
                     const suit = ['hearts', 'diamonds', 'clubs', 'spades'][from.location.index] as keyof typeof newState.foundations;
                     const foundation = newState.foundations[suit];
-                    if (foundation[foundation.length - 1]?.id === from.card.id) {
+                    if (foundation[foundation.length - LAST_ITEM_INDEX_OFFSET]?.id === from.card.id) {
                         const newFoundation = [...foundation];
                         newFoundation.pop();
                         newState.foundations[suit] = newFoundation;
@@ -811,7 +834,7 @@ export function GameBoard() {
                 // Remove from source
                 if (from.location.type === 'tableau') {
                     const sourceColumn = [...newState.tableau[from.location.index]];
-                    if (sourceColumn[sourceColumn.length - 1]?.id === from.card.id) {
+                    if (sourceColumn[sourceColumn.length - LAST_ITEM_INDEX_OFFSET]?.id === from.card.id) {
                         sourceColumn.pop();
                         newState.tableau[from.location.index] = sourceColumn;
                         newState.freeCells[to.index] = from.card;
@@ -820,7 +843,7 @@ export function GameBoard() {
                 } else if (from.location.type === 'foundation') {
                     const suit = ['hearts', 'diamonds', 'clubs', 'spades'][from.location.index] as keyof typeof newState.foundations;
                     const foundation = newState.foundations[suit];
-                    if (foundation[foundation.length - 1]?.id === from.card.id) {
+                    if (foundation[foundation.length - LAST_ITEM_INDEX_OFFSET]?.id === from.card.id) {
                         const newFoundation = [...foundation];
                         newFoundation.pop();
                         newState.foundations[suit] = newFoundation;
@@ -839,7 +862,7 @@ export function GameBoard() {
                 // Remove from source
                 if (from.location.type === 'tableau') {
                     const sourceColumn = [...newState.tableau[from.location.index]];
-                    if (sourceColumn[sourceColumn.length - 1]?.id === from.card.id) {
+                    if (sourceColumn[sourceColumn.length - LAST_ITEM_INDEX_OFFSET]?.id === from.card.id) {
                         sourceColumn.pop();
                         newState.tableau[from.location.index] = sourceColumn;
                         moved = true;
@@ -882,19 +905,19 @@ export function GameBoard() {
                         Game #:
                         <input
                             type="number"
-                            min="1"
-                            max="1000000"
+                            min={MIN_GAME_NUMBER.toString()}
+                            max={MAX_GAME_NUMBER.toString()}
                             value={inputValue}
                             onChange={(e) => handleGameNumberChange(e.target.value)}
                             className={parseInt(inputValue) === currentGameNumber ? 'game-number-match' : ''}
                         />
                     </label>
                     <button onClick={() => {
-                        const num = parseInt(inputValue) || 1;
-                        const clampedNum = Math.max(1, Math.min(1000000, num));
+                        const num = parseInt(inputValue) || MIN_GAME_NUMBER;
+                        const clampedNum = Math.max(MIN_GAME_NUMBER, Math.min(MAX_GAME_NUMBER, num));
                         if (clampedNum === currentGameNumber) {
                             // If already on current game, generate random new game
-                            const randomNum = Math.floor(Math.random() * 1000000) + 1;
+                            const randomNum = Math.floor(Math.random() * MAX_GAME_NUMBER) + MIN_GAME_NUMBER;
                             newGame(randomNum);
                         } else {
                             // Apply the selected game number
@@ -946,7 +969,7 @@ export function GameBoard() {
                         <div className="cell-row">
                             {(['hearts', 'diamonds', 'clubs', 'spades'] as const).map((suit, index) => {
                                 const cards = gameState.foundations[suit];
-                                const topCard = cards[cards.length - 1];
+                                const topCard = cards[cards.length - LAST_ITEM_INDEX_OFFSET];
                                 return (
                                     <div
                                         key={suit}
@@ -995,15 +1018,15 @@ export function GameBoard() {
                                     <Card
                                         key={card.id}
                                         card={card}
-                                        draggable={cardIndex === column.length - 1}
+                                        draggable={cardIndex === column.length - LAST_ITEM_INDEX_OFFSET}
                                         onDragStart={(e) => handleDragStart(e, card, { type: 'tableau', index: columnIndex })}
                                         onDragEnd={handleDragEnd}
-                                        onClick={() => cardIndex === column.length - 1 && handleCardClick(card, { type: 'tableau', index: columnIndex })}
-                                        onDoubleClick={() => cardIndex === column.length - 1 && handleDoubleClick(card, { type: 'tableau', index: columnIndex })}
+                                        onClick={() => cardIndex === column.length - LAST_ITEM_INDEX_OFFSET && handleCardClick(card, { type: 'tableau', index: columnIndex })}
+                                        onDoubleClick={() => cardIndex === column.length - LAST_ITEM_INDEX_OFFSET && handleDoubleClick(card, { type: 'tableau', index: columnIndex })}
                                         className={`${selectedCard?.card.id === card.id ? 'selected' : ''} ${isCardDragging(card) ? 'dragging' : ''}`}
                                         style={{
                                             // Tableau card overlap: -0.75 = 75% overlap. Adjust value between 0 (no overlap) and -1 (100% overlap)
-                                            marginTop: cardIndex === 0 ? '0' : `calc(var(--card-height, 140px) * -0.75)`
+                                            marginTop: cardIndex === 0 ? '0' : `calc(var(--card-height, 140px) * -${TABLEAU_CARD_OVERLAP})`
                                         }}
                                     />
                                 ))}
