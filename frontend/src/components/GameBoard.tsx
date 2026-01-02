@@ -34,6 +34,12 @@ export function GameBoard() {
     const gameBoardRef = useRef<HTMLDivElement>(null);
     const gameAreaRef = useRef<HTMLDivElement>(null);
 
+    // Refs for card position lookups (replacing document.querySelector)
+    const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+    const freeCellRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const foundationRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const tableauColumnRefs = useRef<(HTMLDivElement | null)[]>([]);
+
     // Ref to hold the triggerAutoPlay function (for circular dependency resolution)
     const triggerAutoPlayRef = useRef<((newState: typeof gameState) => void) | null>(null);
 
@@ -63,7 +69,11 @@ export function GameBoard() {
             if (!skipAutoPlay && triggerAutoPlayRef.current) {
                 triggerAutoPlayRef.current(newState);
             }
-        }
+        },
+        cardRefs,
+        freeCellRefs,
+        foundationRefs,
+        tableauColumnRefs
     );
 
     // Auto-play hook
@@ -261,6 +271,7 @@ export function GameBoard() {
                             {gameState.freeCells.map((card, index) => (
                                 <div
                                     key={index}
+                                    ref={el => { freeCellRefs.current[index] = el; }}
                                     className="cell"
                                     onClick={() => {
                                         if (card) {
@@ -280,6 +291,10 @@ export function GameBoard() {
                                             onDragEnd={handleDragEnd}
                                             onDoubleClick={() => handleDoubleClick(card, { type: 'freecell', index })}
                                             className={`${selectedCard?.card.id === card.id ? 'selected' : ''} ${isCardDragging(card) ? 'dragging' : ''}`}
+                                            cardRef={el => {
+                                                if (el) cardRefs.current.set(card.id, el);
+                                                else cardRefs.current.delete(card.id);
+                                            }}
                                         />
                                     ) : (
                                         <div className="card-placeholder"></div>
@@ -297,6 +312,7 @@ export function GameBoard() {
                                 return (
                                     <div
                                         key={suit}
+                                        ref={el => { foundationRefs.current[index] = el; }}
                                         className={`cell foundation-${suit}`}
                                         onClick={() => {
                                             if (topCard) {
@@ -316,6 +332,10 @@ export function GameBoard() {
                                                 onDragEnd={handleDragEnd}
                                                 onDoubleClick={() => handleDoubleClick(topCard, { type: 'foundation', index })}
                                                 className={`${selectedCard?.card.id === topCard.id ? 'selected' : ''} ${isCardDragging(topCard) ? 'dragging' : ''}`}
+                                                cardRef={el => {
+                                                    if (el) cardRefs.current.set(topCard.id, el);
+                                                    else cardRefs.current.delete(topCard.id);
+                                                }}
                                             />
                                         ) : (
                                             <div className="card-placeholder"></div>
@@ -330,7 +350,11 @@ export function GameBoard() {
                 {/* Tableau */}
                 <div className="tableau">
                     {gameState.tableau.map((column, columnIndex) => (
-                        <div key={columnIndex} className="tableau-column">
+                        <div
+                            key={columnIndex}
+                            ref={el => { tableauColumnRefs.current[columnIndex] = el; }}
+                            className="tableau-column"
+                        >
                             <div
                                 className="column-drop-zone"
                                 onClick={() => selectedCard && tryMove(selectedCard, { type: 'tableau', index: columnIndex })}
@@ -350,6 +374,10 @@ export function GameBoard() {
                                         className={`${selectedCard?.card.id === card.id ? 'selected' : ''} ${isCardDragging(card) ? 'dragging' : ''}`}
                                         style={{
                                             marginTop: cardIndex === 0 ? '0' : `calc(var(--card-height, 140px) * -0.75)`
+                                        }}
+                                        cardRef={el => {
+                                            if (el) cardRefs.current.set(card.id, el);
+                                            else cardRefs.current.delete(card.id);
                                         }}
                                     />
                                 ))}

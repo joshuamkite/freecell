@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { RefObject } from 'react';
 import type { GameState } from '../types/gameState';
 import type { Card as CardType } from '../types/card';
 import { canMoveToTableau, canMoveToFoundation } from '../game/freecellLogic';
@@ -24,16 +25,24 @@ interface AnimatingCards {
  * and perform moves. This hook handles the visual animation while delegating
  * state updates to the provided callback.
  *
- * Note: Currently uses document.querySelector for DOM lookups. Session 3 will
- * refactor to use React refs for better performance and React idioms.
+ * Uses React refs for DOM element lookups instead of document.querySelector
+ * for better performance and React idioms.
  *
  * @param gameState - Current game state
  * @param updateGameStateImmediate - Function to update state immediately (with auto-play)
+ * @param cardRefs - Map of card IDs to their DOM elements
+ * @param freeCellRefs - Array of free cell DOM elements
+ * @param foundationRefs - Array of foundation DOM elements
+ * @param tableauColumnRefs - Array of tableau column DOM elements
  * @returns Object containing animation state and movement functions
  */
 export function useCardAnimation(
     gameState: GameState,
-    updateGameStateImmediate: (newState: GameState, skipAutoPlay?: boolean) => void
+    updateGameStateImmediate: (newState: GameState, skipAutoPlay?: boolean) => void,
+    cardRefs: RefObject<Map<string, HTMLDivElement>>,
+    freeCellRefs: RefObject<(HTMLDivElement | null)[]>,
+    foundationRefs: RefObject<(HTMLDivElement | null)[]>,
+    tableauColumnRefs: RefObject<(HTMLDivElement | null)[]>
 ) {
     // Animation state
     const [animatingCards, setAnimatingCards] = useState<AnimatingCards | null>(null);
@@ -42,7 +51,7 @@ export function useCardAnimation(
      * Helper function to get card element position
      */
     const getCardPosition = (cardId: string): { x: number; y: number } | null => {
-        const element = document.querySelector(`[data-card-id="${cardId}"]`) as HTMLElement;
+        const element = cardRefs.current?.get(cardId);
         if (!element) return null;
 
         const rect = element.getBoundingClientRect();
@@ -60,25 +69,22 @@ export function useCardAnimation(
         toIndex: number
     ): { x: number; y: number } | null => {
         if (toPile === 'foundation') {
-            // Find the foundation cell
-            const foundationCells = document.querySelectorAll('.foundation-hearts, .foundation-diamonds, .foundation-clubs, .foundation-spades');
-            const targetCell = foundationCells[toIndex] as HTMLElement;
+            // Find the foundation cell using ref
+            const targetCell = foundationRefs.current?.[toIndex];
             if (!targetCell) return null;
 
             const rect = targetCell.getBoundingClientRect();
             return { x: rect.left, y: rect.top };
         } else if (toPile === 'freecell') {
-            // Find the free cell
-            const freeCells = document.querySelectorAll('.free-cells .cell');
-            const targetCell = freeCells[toIndex] as HTMLElement;
+            // Find the free cell using ref
+            const targetCell = freeCellRefs.current?.[toIndex];
             if (!targetCell) return null;
 
             const rect = targetCell.getBoundingClientRect();
             return { x: rect.left, y: rect.top };
         } else {
             // Tableau column - find the current last card in DOM
-            const tableauColumns = document.querySelectorAll('.tableau-column');
-            const targetColumn = tableauColumns[toIndex] as HTMLElement;
+            const targetColumn = tableauColumnRefs.current?.[toIndex];
             if (!targetColumn) return null;
 
             // Look for cards in this column
