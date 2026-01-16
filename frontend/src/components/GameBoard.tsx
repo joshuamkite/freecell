@@ -19,6 +19,8 @@ import {
     MIN_GAME_NUMBER,
     VICTORY_ANIMATION_DELAY_MS,
     LAST_ITEM_INDEX_OFFSET,
+    DRAG_OVERLAY_Z_INDEX,
+    DRAG_OVERLAY_TRANSFORM,
 } from '../constants';
 import './GameBoard.css';
 
@@ -97,8 +99,10 @@ export function GameBoard() {
         triggerAutoPlay(newState);
     };
 
-    // Drag and drop hook
+    // Drag and drop hook with custom overlay for smooth desktop dragging
     const {
+        dragOverlay,
+        overlayRef,
         handleDragStart,
         handleDragEnd,
         handleDragOver,
@@ -500,6 +504,28 @@ export function GameBoard() {
                     endPos={animatingCards.endPos}
                     onComplete={animatingCards.onComplete}
                 />
+            )}
+
+            {/* Custom drag overlay for smooth card dragging */}
+            {dragOverlay && (
+                <div
+                    ref={overlayRef}
+                    style={{
+                        position: 'fixed',
+                        left: dragOverlay.x,
+                        top: dragOverlay.y,
+                        pointerEvents: 'none',
+                        zIndex: DRAG_OVERLAY_Z_INDEX,
+                        transform: DRAG_OVERLAY_TRANSFORM,
+                    }}
+                >
+                    <Card
+                        card={dragOverlay.card}
+                        cardRef={el => {
+                            if (el) cardRefs.current.set(dragOverlay.card.id, el);
+                        }}
+                    />
+                </div>
             )}
         </div>
     );
