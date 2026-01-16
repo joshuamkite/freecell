@@ -7,8 +7,8 @@
     --card-height: 140px;
     --card-gap: 10px;
     --board-padding: 20px;
-    /* Desktop game width: This is overwritten by JavaScript. Adjust 'gameWidthPercent' in GameBoard.tsx instead. */
-    --max-game-width: 65%;
+    /* Desktop game width: This is overwritten by JavaScript. Adjust GAME_WIDTH_PERCENT in constants.ts instead. */
+    --max-game-width: 90%;
     /* Prevent text selection during drag operations */
     user-select: none;
     -webkit-user-select: none;
@@ -471,5 +471,274 @@
     .tableau {
         --card-width: calc((100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) / 8);
         --card-height: calc(var(--card-width) * 1.4);
+    }
+}
+
+/* Help Modal Styles - Full Page Display (like License Modal) */
+.help-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
+    z-index: 2000;
+    overflow-y: auto;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.help-modal {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.help-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.help-modal h2 {
+    margin: 0 0 2rem 0;
+    color: white;
+    font-size: 2rem;
+}
+
+.help-modal h3 {
+    margin: 0 0 10px 0;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.help-content {
+    color: white;
+    line-height: 1.6;
+}
+
+.help-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.help-section:last-child {
+    margin-bottom: 0;
+}
+
+.help-section p {
+    margin: 0.5rem 0;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.help-section p:last-child {
+    margin-bottom: 0;
+}
+
+.help-section ul {
+    margin: 10px 0 0 0;
+    padding-left: 25px;
+}
+
+.help-section li {
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.help-section li:last-child {
+    margin-bottom: 0;
+}
+
+.help-close {
+    background-color: #4a90e2;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.help-close:hover {
+    background-color: #357abd;
+}
+
+.btn-help-close {
+    background: #4a90e2;
+    border: none;
+    color: white;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: inherit;
+}
+
+.btn-help-close:hover {
+    background: #357abd;
+}
+
+.expand-help-button {
+    background-color: #4a90e2;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 1rem;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.expand-help-button:hover {
+    background-color: #357abd;
+}
+
+.help-details {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideDown 0.3s ease-out;
+}
+
+.help-details h3 {
+    margin: 1.5rem 0 0.5rem 0;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.help-details h3:first-child {
+    margin-top: 0;
+}
+
+.help-details p {
+    margin: 0 0 1rem 0;
+    font-size: 15px;
+}
+
+.help-details ul {
+    margin: 10px 0 0 0;
+    padding-left: 25px;
+}
+
+.help-details li {
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.help-details li:last-child {
+    margin-bottom: 0;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive help modal */
+@media (max-width: 768px) {
+    .help-overlay {
+        padding: 1rem;
+    }
+
+    .help-modal h2 {
+        font-size: 1.5rem;
+    }
+
+    .help-section {
+        padding: 1rem;
+    }
+
+    .help-section h3 {
+        font-size: 1.2rem;
+    }
+
+    .help-section p,
+    .help-section li {
+        font-size: 14px;
+    }
+
+    .expand-help-button {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .help-details {
+        padding: 1rem;
+    }
+
+    .help-details li {
+        font-size: 14px;
+    }
+
+    .help-close {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-help-close {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .help-overlay {
+        padding: 0.5rem;
+    }
+
+    .help-modal h2 {
+        font-size: 1.2rem;
+    }
+
+    .help-section {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .help-section h3 {
+        font-size: 1rem;
+    }
+
+    .help-details {
+        padding: 0.75rem;
+    }
+
+    .help-close {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .expand-help-button {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.75rem;
     }
 }
