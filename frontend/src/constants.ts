@@ -143,6 +143,30 @@ export const TABLET_BREAKPOINT_PX = 768;
 export const AUTO_PLAY_DELAY_MS = 700;
 
 /**
+ * Z-index for drag overlay to ensure it appears above all game elements
+ */
+export const DRAG_OVERLAY_Z_INDEX = 10000;
+
+/**
+ * Transform for centering drag overlay under cursor
+ */
+export const DRAG_OVERLAY_TRANSFORM = 'translate(-50%, -50%)';
+
+// ============================================================================
+// DRAG AND DROP
+// ============================================================================
+
+/**
+ * 1x1 transparent GIF used as drag image to hide browser's default drag preview
+ */
+export const TRANSPARENT_PIXEL_DATA_URI = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+/**
+ * Invalid drag coordinate value (browsers send 0,0 on final drag event)
+ */
+export const INVALID_DRAG_COORDINATE = 0;
+
+/**
  * Delay in milliseconds before showing victory animation after win
  * Gives the final animation time to complete
  */

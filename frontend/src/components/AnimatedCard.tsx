@@ -16,25 +16,27 @@ export function AnimatedCard({
     startPos,
     endPos,
     onComplete,
-    duration = 300
+    duration = 200
 }: AnimatedCardProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isAnimating, setIsAnimating] = useState(false);
 
     useEffect(() => {
-        // Trigger animation in next frame to ensure CSS transition works
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                setIsAnimating(true);
-            });
-        });
+        // Use a minimal delay to ensure the element is rendered before animating
+        // This is faster than double RAF on mobile
+        const startTimer = setTimeout(() => {
+            setIsAnimating(true);
+        }, 10);
 
         // Complete animation after duration
-        const timer = setTimeout(() => {
+        const completeTimer = setTimeout(() => {
             onComplete();
-        }, duration);
+        }, duration + 10);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(startTimer);
+            clearTimeout(completeTimer);
+        };
     }, [duration, onComplete]);
 
     const transform = isAnimating
@@ -52,7 +54,7 @@ export function AnimatedCard({
                 zIndex: 1000,
                 pointerEvents: 'none',
                 transform,
-                transition: `transform ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+                transition: `transform ${duration}ms ease-out`,
             }}
         >
             {cards.map((card, index) => (
