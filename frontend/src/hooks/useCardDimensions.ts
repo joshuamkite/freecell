@@ -14,6 +14,10 @@ import {
     TABLET_BREAKPOINT_PX,
     TABLEAU_COLUMN_COUNT,
     TABLEAU_GAPS,
+    HEADER_HEIGHT_PX,
+    FOOTER_HEIGHT_PX,
+    MAX_OVERLAPPED_CARDS,
+    TABLEAU_CARD_VISIBLE_RATIO,
 } from '../constants';
 
 /**
@@ -60,8 +64,25 @@ export function useCardDimensions(
             const tableauItems = TABLEAU_COLUMN_COUNT;
             const tableauGaps = TABLEAU_GAPS;
 
-            // Calculate card width to fill available space
-            let cardWidth = (availableWidth - (tableauGaps * cardGap)) / tableauItems;
+            // Calculate card width to fill available space (based on width)
+            const cardWidthFromWidth = (availableWidth - (tableauGaps * cardGap)) / tableauItems;
+
+            // Calculate maximum card height based on viewport height
+            // Layout: header + top area (1 card) + gap + tableau (1 full card + overlapped cards) + footer
+            const topAreaGap = cardGap * 4; // margin-bottom between top area and tableau
+
+            const availableHeight = window.innerHeight - HEADER_HEIGHT_PX - FOOTER_HEIGHT_PX - (boardPadding * 2);
+            // availableHeight = topCardHeight + topAreaGap + tableauHeight
+            // tableauHeight = cardHeight + (maxOverlappedCards * cardHeight * TABLEAU_CARD_VISIBLE_RATIO)
+            // tableauHeight = cardHeight * (1 + maxOverlappedCards * 0.25)
+            const tableauHeightMultiplier = 1 + (MAX_OVERLAPPED_CARDS * TABLEAU_CARD_VISIBLE_RATIO);
+            // Total height needed = cardHeight (top area) + topAreaGap + cardHeight * tableauHeightMultiplier
+            // availableHeight = cardHeight * (1 + tableauHeightMultiplier) + topAreaGap
+            const maxCardHeight = (availableHeight - topAreaGap) / (1 + tableauHeightMultiplier);
+            const cardWidthFromHeight = maxCardHeight / CARD_ASPECT_RATIO;
+
+            // Use the smaller of width-based or height-based calculation
+            let cardWidth = Math.min(cardWidthFromWidth, cardWidthFromHeight);
 
             // Set reasonable bounds (minimum 60px)
             const minWidth = CARD_MIN_WIDTH_PX;
@@ -70,12 +91,15 @@ export function useCardDimensions(
             // Maintain 5:7 aspect ratio (width:height)
             const cardHeight = cardWidth * CARD_ASPECT_RATIO;
 
+            // Calculate the actual game width based on card dimensions
+            const actualGameWidth = (cardWidth * tableauItems) + (tableauGaps * cardGap);
+
             // Set CSS custom properties
             gameBoardRef.current.style.setProperty('--card-width', `${cardWidth}px`);
             gameBoardRef.current.style.setProperty('--card-height', `${cardHeight}px`);
             gameBoardRef.current.style.setProperty('--card-gap', `${cardGap}px`);
             gameBoardRef.current.style.setProperty('--board-padding', `${boardPadding}px`);
-            gameBoardRef.current.style.setProperty('--max-game-width', `${gameWidthPercent * 100}%`);
+            gameBoardRef.current.style.setProperty('--max-game-width', `${actualGameWidth}px`);
         };
 
         calculateCardDimensions();

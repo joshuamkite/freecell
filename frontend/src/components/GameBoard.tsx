@@ -31,6 +31,8 @@ export function GameBoard() {
     const [selectedCard, setSelectedCard] = useState<{ card: CardType; location: { type: string; index: number } } | null>(null);
     const [showVictory, setShowVictory] = useState(false);
     const [showLicense, setShowLicense] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
+    const [showMoreHelp, setShowMoreHelp] = useState(false);
     const gameBoardRef = useRef<HTMLDivElement>(null);
     const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -389,6 +391,12 @@ export function GameBoard() {
 
             <footer className="game-footer">
                 <div className="footer-buttons">
+                    <button
+                        onClick={() => setShowHelp(true)}
+                        className="footer-button"
+                    >
+                        How to Play
+                    </button>
                     <a
                         href="https://www.joshuakite.co.uk/"
                         target="_blank"
@@ -418,6 +426,71 @@ export function GameBoard() {
 
             {showLicense && (
                 <LicenseModal onClose={() => setShowLicense(false)} />
+            )}
+
+            {/* How to Play Modal */}
+            {showHelp && (
+                <div className="help-overlay">
+                    <div className="help-modal">
+                        <button className="help-close" onClick={() => setShowHelp(false)}>× Close</button>
+                        <h2>How to Play</h2>
+
+                        <div className="help-content">
+                            <section className="help-section">
+                                <p>Move all cards to the four foundation piles, building each suit from Ace to King.</p>
+                                <p><strong>Free Cells:</strong> Use the four free cells to temporarily store single cards.</p>
+                                <p><strong>Tableau:</strong> Build down in alternating colors (red on black, black on red).</p>
+
+                                <button
+                                    className="expand-help-button"
+                                    onClick={() => setShowMoreHelp(!showMoreHelp)}
+                                >
+                                    {showMoreHelp ? '▼ Hide Details' : '▶ Show Details'}
+                                </button>
+
+                                {showMoreHelp && (
+                                    <div className="help-details">
+                                        <h3>Objective</h3>
+                                        <p>Build all four foundation piles from Ace to King, one for each suit (Hearts, Diamonds, Clubs, Spades).</p>
+
+                                        <h3>Free Cells</h3>
+                                        <ul>
+                                            <li>Four free cells in the top-left for temporary card storage</li>
+                                            <li>Each free cell can hold only one card at a time</li>
+                                            <li>Strategic use of free cells is key to winning</li>
+                                        </ul>
+
+                                        <h3>Tableau Rules</h3>
+                                        <ul>
+                                            <li>Build down in alternating colors</li>
+                                            <li>Only the top card of each column can be moved</li>
+                                            <li>Any card can be placed on an empty column</li>
+                                            <li>Double-click a card to auto-move it to a foundation</li>
+                                        </ul>
+
+                                        <h3>Foundation Rules</h3>
+                                        <ul>
+                                            <li>Build up by suit from Ace to King</li>
+                                            <li>Cards are automatically moved when safe</li>
+                                        </ul>
+
+                                        <h3>Tips</h3>
+                                        <ul>
+                                            <li>Keep free cells open as long as possible</li>
+                                            <li>Plan several moves ahead before committing</li>
+                                            <li>Empty tableau columns are very valuable</li>
+                                            <li>Use Undo to try different strategies</li>
+                                        </ul>
+                                    </div>
+                                )}
+                            </section>
+                        </div>
+
+                        <button className="btn-help-close" onClick={() => setShowHelp(false)}>
+                            Got it!
+                        </button>
+                    </div>
+                </div>
             )}
 
             {animatingCards && (

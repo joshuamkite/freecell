@@ -75,10 +75,10 @@ export const CARD_GAP_TABLET_PX = 5;
 export const CARD_GAP_MOBILE_PX = 3;
 
 /**
- * Game area width as percentage of viewport (0.65 = 65%)
+ * Game area width as percentage of viewport (0.90 = 90%)
  * Adjust this to make the game wider or narrower on desktop
  */
-export const GAME_WIDTH_PERCENT = 0.65;
+export const GAME_WIDTH_PERCENT = 0.90;
 
 /**
  * Minimum card width in pixels to ensure readability on small screens
@@ -96,6 +96,27 @@ export const CARD_ASPECT_RATIO = 1.4;
  * Lower values show more of each card, higher values save vertical space
  */
 export const TABLEAU_CARD_OVERLAP = 0.75;
+
+/**
+ * Visible portion of overlapped tableau cards (1 - overlap ratio)
+ */
+export const TABLEAU_CARD_VISIBLE_RATIO = 1 - TABLEAU_CARD_OVERLAP; // 0.25
+
+/**
+ * Header height in pixels for layout calculations
+ */
+export const HEADER_HEIGHT_PX = 80;
+
+/**
+ * Footer height in pixels for layout calculations
+ */
+export const FOOTER_HEIGHT_PX = 80;
+
+/**
+ * Maximum number of overlapped cards in tableau for height calculations
+ * FreeCell can have deeper stacks than Klondike
+ */
+export const MAX_OVERLAPPED_CARDS = 14;
 
 // ============================================================================
 // RESPONSIVE BREAKPOINTS
