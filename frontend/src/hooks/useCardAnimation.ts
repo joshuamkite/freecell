@@ -63,10 +63,12 @@ export function useCardAnimation(
 
     /**
      * Helper to get the destination element position (uses current DOM state, not future state)
+     * Accepts pre-computed cardHeight to avoid repeated getComputedStyle calls
      */
     const getDestinationPosition = (
         toPile: 'tableau' | 'freecell' | 'foundation',
-        toIndex: number
+        toIndex: number,
+        cardHeight: number
     ): { x: number; y: number } | null => {
         if (toPile === 'foundation') {
             // Find the foundation cell using ref
@@ -95,7 +97,6 @@ export function useCardAnimation(
                 const rect = lastCard.getBoundingClientRect();
 
                 // Calculate the position for the new card (below the last one)
-                const cardHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height') || '140');
                 return {
                     x: rect.left,
                     y: rect.top + cardHeight * (1 - TABLEAU_CARD_OVERLAP)
@@ -156,9 +157,12 @@ export function useCardAnimation(
             cardId = cardToMove.id;
         }
 
-        // Get start position
+        // Batch all DOM reads together to avoid layout thrashing
         const startPos = getCardPosition(cardId);
-        if (!startPos) {
+        const cardHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height') || '140');
+        const endPos = getDestinationPosition(toPile, toIndex, cardHeight);
+
+        if (!startPos || !endPos) {
             // Can't animate - just do the move immediately
             const newState = performMove(gameState, fromPile, fromIndex, toPile, toIndex);
             if (newState) {
@@ -173,15 +177,6 @@ export function useCardAnimation(
         if (!newState) {
             onAnimationComplete?.();
             return; // Invalid move
-        }
-
-        // Get end position based on current DOM state
-        const endPos = getDestinationPosition(toPile, toIndex);
-        if (!endPos) {
-            // Can't get end position - just update immediately
-            updateGameStateImmediate(newState);
-            onAnimationComplete?.();
-            return;
         }
 
         // Start the animation
