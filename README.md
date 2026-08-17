@@ -9,6 +9,7 @@ A React TypeScript implementation of the classic FreeCell solitaire card game wi
 ![OpenTofu](https://img.shields.io/badge/OpenTofu-1.10+-FFDA18?style=flat&logo=opentofu&logoColor=000000)
 
 - [FreeCell Solitaire](#freecell-solitaire)
+  - [Screenshots](#screenshots)
   - [Features](#features)
   - [Technology Stack](#technology-stack)
   - [Project Structure](#project-structure)
@@ -32,6 +33,10 @@ A React TypeScript implementation of the classic FreeCell solitaire card game wi
   - [Inputs](#inputs)
   - [Outputs](#outputs)
 
+
+## Screenshots
+
+![FreeCell Solitaire](screenshots/freecell.jpg)
 
 ## Features
 
