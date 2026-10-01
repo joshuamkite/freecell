@@ -4,19 +4,23 @@
 This is a TypeScript React implementation of the classic FreeCell solitaire card game. The game runs entirely client-side and is designed to be deployed to AWS S3/CloudFront as a static website.
 
 ## Technology Stack
-- **Framework**: React 18 with TypeScript
+- **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite
 - **Package Manager**: Bun
+- **Lint/Format**: Biome
+- **Tests**: Vitest
 - **Deployment Target**: AWS S3 + CloudFront
 
 ## Project Structure
 ```
-/src
+/frontend/src
   /components      - React components (Card, GameBoard, etc.)
   /game           - Game logic, state management, and rules
   /utils          - Utility functions (RNG, shuffling, etc.)
   /assets         - Card images from Wikimedia Commons
   /types          - TypeScript type definitions
+/dev_tooling      - Card image downloader and deal checker (test-canonical.ts)
+/terraform        - AWS S3 + CloudFront infrastructure
 ```
 
 ## Key Features
@@ -33,10 +37,19 @@ This is a TypeScript React implementation of the classic FreeCell solitaire card
 8. **Win Detection**: Automatic detection when game is won
 
 ## Development Commands
+Run from the `frontend` directory:
 - `bun install` - Install dependencies
 - `bun dev` - Start development server
-- `bun build` - Build for production
+- `bun run build` - Typecheck and build for production
 - `bun preview` - Preview production build
+- `bun run test` - Run unit tests (Vitest)
+- `bun run lint` - Lint with Biome
+- `bun run format` - Format with Biome
+
+## Deal Verification
+Game numbers must match the classic Microsoft FreeCell deals. Reference layouts live in
+`frontend/src/game/msReferenceDeals.ts` and are enforced by the unit tests. Add new references
+there only from a trustworthy source; any change to the RNG or dealing code must keep them passing.
 
 ## FreeCell Rules
 - 52 cards dealt face-up into 8 tableau columns (first 4 columns have 7 cards, last 4 have 6)

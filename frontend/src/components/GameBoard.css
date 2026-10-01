@@ -1,744 +1,753 @@
 .game-board {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
-    padding: var(--board-padding, 20px);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    --card-width: 100px;
-    --card-height: 140px;
-    --card-gap: 10px;
-    --board-padding: 20px;
-    /* Desktop game width: This is overwritten by JavaScript. Adjust GAME_WIDTH_PERCENT in constants.ts instead. */
-    --max-game-width: 90%;
-    /* Prevent text selection during drag operations */
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
+  padding: var(--board-padding, 20px);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  --card-width: 100px;
+  --card-height: 140px;
+  --card-gap: 10px;
+  --board-padding: 20px;
+  /* Desktop game width: This is overwritten by JavaScript. Adjust GAME_WIDTH_PERCENT in constants.ts instead. */
+  --max-game-width: 90%;
+  /* Prevent text selection during drag operations */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .game-header {
-    max-width: var(--max-game-width, 80%);
-    margin: 0 auto 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 15px 25px;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-    gap: 20px;
+  max-width: var(--max-game-width, 80%);
+  margin: 0 auto 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px 25px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  gap: 20px;
 }
 
 .game-header h1 {
-    color: white;
-    margin: 0;
-    font-size: 32px;
-    font-weight: 600;
+  color: white;
+  margin: 0;
+  font-size: 32px;
+  font-weight: 600;
 }
 
 .game-stats {
-    color: white;
-    font-size: 16px;
-    font-weight: 500;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .undo-controls {
-    display: flex;
-    align-items: center;
-    flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
 }
 
 .undo-controls button {
-    padding: 8px 16px;
-    background: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background 0.2s;
+  padding: 8px 16px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
 .undo-controls button:hover:not(:disabled) {
-    background: #357abd;
+  background: #357abd;
 }
 
 .undo-controls button:disabled {
-    background: #6b6b6b;
-    cursor: not-allowed;
-    opacity: 0.5;
+  background: #6b6b6b;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .game-controls {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .game-controls label {
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
 }
 
 .game-controls input[type="number"] {
-    width: 100px;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: background-color 0.3s, color 0.3s;
-    background-color: #1a1a1a;
-    color: white;
+  width: 100px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  background-color: #1a1a1a;
+  color: white;
 }
 
 .game-controls input[type="number"].game-number-match {
-    background-color: #2d7a4a;
-    color: white;
-    font-weight: 500;
+  background-color: #2d7a4a;
+  color: white;
+  font-weight: 500;
 }
 
 .game-controls button {
-    padding: 8px 16px;
-    background: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background 0.2s;
+  padding: 8px 16px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
 .game-controls button:hover:not(:disabled) {
-    background: #357abd;
+  background: #357abd;
 }
 
 .game-controls button:disabled {
-    background: #6b6b6b;
-    cursor: not-allowed;
-    opacity: 0.5;
+  background: #6b6b6b;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .game-area {
-    width: 100%;
-    max-width: var(--max-game-width, 80%);
-    margin: 0 auto;
-    /* Prevent text selection during drag operations */
-    user-select: none;
-    -webkit-user-select: none;
+  width: 100%;
+  max-width: var(--max-game-width, 80%);
+  margin: 0 auto;
+  /* Prevent text selection during drag operations */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .top-area {
-    display: grid;
-    grid-template-columns: repeat(8, var(--card-width, 100px));
-    gap: var(--card-gap, 10px);
-    margin-bottom: calc(var(--card-gap, 10px) * 4);
-    width: 100%;
-    align-items: start;
-    /* Prevent text selection during drag operations */
-    user-select: none;
-    -webkit-user-select: none;
+  display: grid;
+  grid-template-columns: repeat(8, var(--card-width, 100px));
+  gap: var(--card-gap, 10px);
+  margin-bottom: calc(var(--card-gap, 10px) * 4);
+  width: 100%;
+  align-items: start;
+  /* Prevent text selection during drag operations */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .free-cells {
-    grid-column: 1 / 5;
-    display: contents;
+  grid-column: 1 / 5;
+  display: contents;
 }
 
 .foundations {
-    grid-column: 5 / 9;
-    display: contents;
+  grid-column: 5 / 9;
+  display: contents;
 }
 
 .cell-row {
-    display: contents;
+  display: contents;
 }
 
 .cell {
-    cursor: pointer;
-    position: relative;
-    /* Expand the drop zone to make drops easier */
-    padding: calc(var(--card-height, 140px) * 0.3);
-    margin: calc(var(--card-height, 140px) * -0.3);
-    /* Prevent text selection during drag operations */
-    user-select: none;
-    -webkit-user-select: none;
+  cursor: pointer;
+  position: relative;
+  /* Expand the drop zone to make drops easier */
+  padding: calc(var(--card-height, 140px) * 0.3);
+  margin: calc(var(--card-height, 140px) * -0.3);
+  /* Prevent text selection during drag operations */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .tableau {
-    display: grid;
-    grid-template-columns: repeat(8, var(--card-width, 100px));
-    gap: var(--card-gap, 10px);
-    width: 100%;
-    /* Prevent text selection during drag operations */
-    user-select: none;
-    -webkit-user-select: none;
+  display: grid;
+  grid-template-columns: repeat(8, var(--card-width, 100px));
+  gap: var(--card-gap, 10px);
+  width: 100%;
+  /* Prevent text selection during drag operations */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .tableau-column {
-    min-height: calc(var(--card-height, 140px) * 2.75);
-    /* Prevent text selection during drag operations */
-    user-select: none;
-    -webkit-user-select: none;
+  min-height: calc(var(--card-height, 140px) * 2.75);
+  /* Prevent text selection during drag operations */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .column-drop-zone {
-    min-height: calc(var(--card-height, 140px) * 2.75);
-    border-radius: calc(var(--card-width, 100px) * 0.06);
-    transition: background-color 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* Expand the drop zone with padding to make drops easier */
-    padding: calc(var(--card-height, 140px) * 0.4) 0;
-    margin: calc(var(--card-height, 140px) * -0.4) 0;
-    /* Prevent text selection during drag operations */
-    user-select: none;
-    -webkit-user-select: none;
+  min-height: calc(var(--card-height, 140px) * 2.75);
+  border-radius: calc(var(--card-width, 100px) * 0.06);
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Expand the drop zone with padding to make drops easier */
+  padding: calc(var(--card-height, 140px) * 0.4) 0;
+  margin: calc(var(--card-height, 140px) * -0.4) 0;
+  /* Prevent text selection during drag operations */
+  user-select: none;
+  -webkit-user-select: none;
 }
-
 
 /* Foundation suit indicators - faint icons in background */
 .foundation-hearts .card-placeholder::before,
 .foundation-diamonds .card-placeholder::before,
 .foundation-clubs .card-placeholder::before,
 .foundation-spades .card-placeholder::before {
-    font-size: calc(var(--card-width, 100px) * 0.5);
-    opacity: 0.3;
-    font-weight: normal;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+  font-size: calc(var(--card-width, 100px) * 0.5);
+  opacity: 0.3;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .foundation-hearts .card-placeholder::before {
-    content: '♥';
-    color: #d32f2f;
+  content: "♥";
+  color: #d32f2f;
 }
 
 .foundation-diamonds .card-placeholder::before {
-    content: '♦';
-    color: #d32f2f;
+  content: "♦";
+  color: #d32f2f;
 }
 
 .foundation-clubs .card-placeholder::before {
-    content: '♣';
-    color: #1a1a1a;
+  content: "♣";
+  color: #1a1a1a;
 }
 
 .foundation-spades .card-placeholder::before {
-    content: '♠';
-    color: #1a1a1a;
+  content: "♠";
+  color: #1a1a1a;
 }
 
 /* Footer */
 .game-footer {
-    max-width: var(--max-game-width, 80%);
-    margin: 25px auto 0;
-    padding: 10px;
-    text-align: center;
+  max-width: var(--max-game-width, 80%);
+  margin: 25px auto 0;
+  padding: 10px;
+  text-align: center;
 }
 
 .footer-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .footer-button {
-    padding: 8px 16px;
-    background: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background 0.2s;
-    text-decoration: none;
-    display: inline-block;
-    font-family: inherit;
+  padding: 8px 16px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  font-family: inherit;
 }
 
 .footer-button:hover {
-    background: #357abd;
-    text-decoration: none;
+  background: #357abd;
+  text-decoration: none;
 }
 
 /* Responsive design for mobile devices */
 @media (max-width: 768px) {
-    .game-board {
-        --board-padding: 8px;
-        --card-gap: 5px;
-        padding: var(--board-padding);
-        --max-game-width: 100%;
-        overflow-x: hidden;
-    }
+  .game-board {
+    --board-padding: 8px;
+    --card-gap: 5px;
+    padding: var(--board-padding);
+    --max-game-width: 100%;
+    overflow-x: hidden;
+  }
 
-    .game-header {
-        flex-direction: column;
-        gap: 10px;
-        padding: 12px 15px;
-        margin-bottom: 15px;
-        max-width: 100%;
-    }
+  .game-header {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    max-width: 100%;
+  }
 
-    .game-area {
-        max-width: 100%;
-        overflow-x: hidden;
-    }
+  .game-area {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 
-    .game-header h1 {
-        font-size: 24px;
-    }
+  .game-header h1 {
+    font-size: 24px;
+  }
 
-    .game-stats {
-        font-size: 14px;
-    }
+  .game-stats {
+    font-size: 14px;
+  }
 
-    .game-controls {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-    }
+  .game-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
 
-    .game-controls button {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
+  .game-controls button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 
-    .game-controls input[type="number"] {
-        width: 80px;
-        padding: 5px 8px;
-        font-size: 13px;
-    }
+  .game-controls input[type="number"] {
+    width: 80px;
+    padding: 5px 8px;
+    font-size: 13px;
+  }
 
-    .top-area {
-        margin-bottom: calc(var(--card-gap) * 3);
-        grid-template-columns: repeat(8, var(--card-width, 100px));
-    }
+  .top-area {
+    margin-bottom: calc(var(--card-gap) * 3);
+    grid-template-columns: repeat(8, var(--card-width, 100px));
+  }
 
-    .tableau-column {
-        min-height: calc(var(--card-height) * 2);
-    }
+  .tableau-column {
+    min-height: calc(var(--card-height) * 2);
+  }
 
-    .column-drop-zone {
-        min-height: calc(var(--card-height) * 2);
-    }
+  .column-drop-zone {
+    min-height: calc(var(--card-height) * 2);
+  }
 
-    .game-footer {
-        margin-top: var(--card-height);
-        padding: 15px;
-        max-width: 100%;
-    }
+  .game-footer {
+    margin-top: var(--card-height);
+    padding: 15px;
+    max-width: 100%;
+  }
 
-    .footer-buttons {
-        gap: 10px;
-    }
+  .footer-buttons {
+    gap: 10px;
+  }
 
-    .footer-button {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
+  .footer-button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 }
 
 /* Extra small mobile devices */
 @media (max-width: 480px) {
-    .game-board {
-        --board-padding: 5px;
-        --card-gap: 3px;
-    }
+  .game-board {
+    --board-padding: 5px;
+    --card-gap: 3px;
+  }
 
-    .game-header {
-        padding: 10px;
-        margin-bottom: 10px;
-        gap: 8px;
-    }
+  .game-header {
+    padding: 10px;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
 
-    .game-header h1 {
-        font-size: 20px;
-    }
+  .game-header h1 {
+    font-size: 20px;
+  }
 
-    .game-stats {
-        font-size: 12px;
-    }
+  .game-stats {
+    font-size: 12px;
+  }
 
-    .game-controls button {
-        padding: 5px 10px;
-        font-size: 11px;
-    }
+  .game-controls button {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
 
-    .game-controls input[type="number"] {
-        width: 70px;
-        padding: 4px 6px;
-        font-size: 11px;
-    }
+  .game-controls input[type="number"] {
+    width: 70px;
+    padding: 4px 6px;
+    font-size: 11px;
+  }
 
-    .game-controls label {
-        font-size: 11px;
-    }
+  .game-controls label {
+    font-size: 11px;
+  }
 
-    .top-area {
-        margin-bottom: calc(var(--card-gap) * 2);
-    }
+  .top-area {
+    margin-bottom: calc(var(--card-gap) * 2);
+  }
 
-    .tableau-column {
-        min-height: calc(var(--card-height) * 1.5);
-    }
+  .tableau-column {
+    min-height: calc(var(--card-height) * 1.5);
+  }
 
-    .column-drop-zone {
-        min-height: calc(var(--card-height) * 1.5);
-    }
+  .column-drop-zone {
+    min-height: calc(var(--card-height) * 1.5);
+  }
 
-    .game-footer {
-        margin-top: var(--card-height);
-        padding: 10px;
-    }
+  .game-footer {
+    margin-top: var(--card-height);
+    padding: 10px;
+  }
 
-    .footer-button {
-        padding: 5px 10px;
-        font-size: 11px;
-    }
+  .footer-button {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
 }
 
 /* Responsive card sizing */
 @media (max-width: 768px) {
-
-    .top-area,
-    .tableau {
-        --card-width: calc((100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) / 8);
-        --card-height: calc(var(--card-width) * 1.4);
-    }
+  .top-area,
+  .tableau {
+    --card-width: calc(
+      (100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) /
+      8
+    );
+    --card-height: calc(var(--card-width) * 1.4);
+  }
 }
 
 @media (max-width: 480px) {
-
-    .top-area,
-    .tableau {
-        --card-width: calc((100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) / 8);
-        --card-height: calc(var(--card-width) * 1.4);
-    }
+  .top-area,
+  .tableau {
+    --card-width: calc(
+      (100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) /
+      8
+    );
+    --card-height: calc(var(--card-width) * 1.4);
+  }
 }
 
 /* Landscape orientation adjustments for mobile */
 @media (max-width: 896px) and (orientation: landscape) {
-    .game-board {
-        --board-padding: 5px;
-        --card-gap: 4px;
-    }
+  .game-board {
+    --board-padding: 5px;
+    --card-gap: 4px;
+  }
 
-    .game-header {
-        flex-direction: row;
-        flex-wrap: wrap;
-        padding: 8px 12px;
-        margin-bottom: 10px;
-        max-width: 100%;
-    }
+  .game-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    max-width: 100%;
+  }
 
-    .game-area {
-        max-width: 100%;
-    }
+  .game-area {
+    max-width: 100%;
+  }
 
-    .game-header h1 {
-        font-size: 18px;
-    }
+  .game-header h1 {
+    font-size: 18px;
+  }
 
-    .game-stats {
-        font-size: 12px;
-    }
+  .game-stats {
+    font-size: 12px;
+  }
 
-    .tableau-column {
-        min-height: calc(var(--card-height) * 1.5);
-    }
+  .tableau-column {
+    min-height: calc(var(--card-height) * 1.5);
+  }
 
-    .column-drop-zone {
-        min-height: calc(var(--card-height) * 1.5);
-    }
+  .column-drop-zone {
+    min-height: calc(var(--card-height) * 1.5);
+  }
 
-    .game-footer {
-        max-width: 100%;
-        margin-top: var(--card-height);
-    }
+  .game-footer {
+    max-width: 100%;
+    margin-top: var(--card-height);
+  }
 
-    .top-area,
-    .tableau {
-        --card-width: calc((100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) / 8);
-        --card-height: calc(var(--card-width) * 1.4);
-    }
+  .top-area,
+  .tableau {
+    --card-width: calc(
+      (100vw - 2 * var(--board-padding) - 7 * var(--card-gap)) /
+      8
+    );
+    --card-height: calc(var(--card-width) * 1.4);
+  }
 }
 
 /* Help Modal Styles - Full Page Display (like License Modal) */
 .help-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
-    z-index: 2000;
-    overflow-y: auto;
-    padding: 2rem;
-    box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
+  z-index: 2000;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
 .help-modal {
-    max-width: 900px;
-    margin: 0 auto;
-    position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .help-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .help-modal h2 {
-    margin: 0 0 2rem 0;
-    color: white;
-    font-size: 2rem;
+  margin: 0 0 2rem 0;
+  color: white;
+  font-size: 2rem;
 }
 
 .help-modal h3 {
-    margin: 0 0 10px 0;
-    color: white;
-    font-size: 1.5rem;
-    font-weight: 700;
+  margin: 0 0 10px 0;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .help-content {
-    color: white;
-    line-height: 1.6;
+  color: white;
+  line-height: 1.6;
 }
 
 .help-section {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .help-section:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .help-section p {
-    margin: 0.5rem 0;
-    font-size: 16px;
-    line-height: 1.6;
+  margin: 0.5rem 0;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 .help-section p:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .help-section ul {
-    margin: 10px 0 0 0;
-    padding-left: 25px;
+  margin: 10px 0 0 0;
+  padding-left: 25px;
 }
 
 .help-section li {
-    margin-bottom: 8px;
-    font-size: 15px;
+  margin-bottom: 8px;
+  font-size: 15px;
 }
 
 .help-section li:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .help-close {
-    background-color: #4a90e2;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: all 0.2s;
-    position: absolute;
-    top: 0;
-    right: 0;
+  background-color: #4a90e2;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .help-close:hover {
-    background-color: #357abd;
+  background-color: #357abd;
 }
 
 .btn-help-close {
-    background: #4a90e2;
-    border: none;
-    color: white;
-    margin-top: 1.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-family: inherit;
+  background: #4a90e2;
+  border: none;
+  color: white;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
 }
 
 .btn-help-close:hover {
-    background: #357abd;
+  background: #357abd;
 }
 
 .expand-help-button {
-    background-color: #4a90e2;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-top: 1rem;
-    transition: all 0.2s;
-    font-family: inherit;
+  background-color: #4a90e2;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 1rem;
+  transition: all 0.2s;
+  font-family: inherit;
 }
 
 .expand-help-button:hover {
-    background-color: #357abd;
+  background-color: #357abd;
 }
 
 .help-details {
-    margin-top: 1rem;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    animation: slideDown 0.3s ease-out;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1e5631 0%, #2d7a4a 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideDown 0.3s ease-out;
 }
 
 .help-details h3 {
-    margin: 1.5rem 0 0.5rem 0;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: 700;
+  margin: 1.5rem 0 0.5rem 0;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .help-details h3:first-child {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .help-details p {
-    margin: 0 0 1rem 0;
-    font-size: 15px;
+  margin: 0 0 1rem 0;
+  font-size: 15px;
 }
 
 .help-details ul {
-    margin: 10px 0 0 0;
-    padding-left: 25px;
+  margin: 10px 0 0 0;
+  padding-left: 25px;
 }
 
 .help-details li {
-    margin-bottom: 8px;
-    font-size: 15px;
+  margin-bottom: 8px;
+  font-size: 15px;
 }
 
 .help-details li:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 @keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive help modal */
 @media (max-width: 768px) {
-    .help-overlay {
-        padding: 1rem;
-    }
+  .help-overlay {
+    padding: 1rem;
+  }
 
-    .help-modal h2 {
-        font-size: 1.5rem;
-    }
+  .help-modal h2 {
+    font-size: 1.5rem;
+  }
 
-    .help-section {
-        padding: 1rem;
-    }
+  .help-section {
+    padding: 1rem;
+  }
 
-    .help-section h3 {
-        font-size: 1.2rem;
-    }
+  .help-section h3 {
+    font-size: 1.2rem;
+  }
 
-    .help-section p,
-    .help-section li {
-        font-size: 14px;
-    }
+  .help-section p,
+  .help-section li {
+    font-size: 14px;
+  }
 
-    .expand-help-button {
-        font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
-    }
+  .expand-help-button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
 
-    .help-details {
-        padding: 1rem;
-    }
+  .help-details {
+    padding: 1rem;
+  }
 
-    .help-details li {
-        font-size: 14px;
-    }
+  .help-details li {
+    font-size: 14px;
+  }
 
-    .help-close {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-    }
+  .help-close {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
 
-    .btn-help-close {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-    }
+  .btn-help-close {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 480px) {
-    .help-overlay {
-        padding: 0.5rem;
-    }
+  .help-overlay {
+    padding: 0.5rem;
+  }
 
-    .help-modal h2 {
-        font-size: 1.2rem;
-    }
+  .help-modal h2 {
+    font-size: 1.2rem;
+  }
 
-    .help-section {
-        padding: 0.75rem;
-        font-size: 0.9rem;
-    }
+  .help-section {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
 
-    .help-section h3 {
-        font-size: 1rem;
-    }
+  .help-section h3 {
+    font-size: 1rem;
+  }
 
-    .help-details {
-        padding: 0.75rem;
-    }
+  .help-details {
+    padding: 0.75rem;
+  }
 
-    .help-close {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-    }
+  .help-close {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
 
-    .expand-help-button {
-        padding: 0.4rem 0.7rem;
-        font-size: 0.75rem;
-    }
+  .expand-help-button {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+  }
 }

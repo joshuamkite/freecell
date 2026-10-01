@@ -1,104 +1,106 @@
 .card {
-    width: var(--card-width, 100px);
-    height: var(--card-height, 140px);
-    cursor: grab;
-    user-select: none;
-    position: relative;
-    border-radius: calc(var(--card-width, 100px) * 0.08);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: box-shadow 0.15s ease-out, transform 0.15s ease-out;
-    -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
-    touch-action: manipulation;
+  width: var(--card-width, 100px);
+  height: var(--card-height, 140px);
+  cursor: grab;
+  user-select: none;
+  position: relative;
+  border-radius: calc(var(--card-width, 100px) * 0.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition:
+    box-shadow 0.15s ease-out,
+    transform 0.15s ease-out;
+  -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
+  touch-action: manipulation;
 }
 
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .card:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
-    .card:hover {
-        /* Reduce hover effects on mobile since touch doesn't have hover */
-        transform: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
+  .card:hover {
+    /* Reduce hover effects on mobile since touch doesn't have hover */
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
 
-    .card:active {
-        transform: scale(0.98);
-    }
+  .card:active {
+    transform: scale(0.98);
+  }
 
-    .card.selected {
-        outline-width: 2px;
-        outline-offset: 1px;
-    }
+  .card.selected {
+    outline-width: 2px;
+    outline-offset: 1px;
+  }
 }
 
 @media (max-width: 480px) {
-    .card.selected {
-        outline-width: 2px;
-        outline-offset: 1px;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4);
-    }
+  .card.selected {
+    outline-width: 2px;
+    outline-offset: 1px;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4);
+  }
 }
 
 .card img {
-    width: 100%;
-    height: 100%;
-    border-radius: calc(var(--card-width, 100px) * 0.06);
-    display: block;
-    pointer-events: none;
+  width: 100%;
+  height: 100%;
+  border-radius: calc(var(--card-width, 100px) * 0.06);
+  display: block;
+  pointer-events: none;
 }
 
 .card.dragging {
-    opacity: 0;
-    cursor: grabbing;
+  opacity: 0;
+  cursor: grabbing;
 }
 
 .card.selected {
-    outline: 3px solid #4a90e2;
-    outline-offset: 2px;
-    transform: translateY(-4px);
-    box-shadow: 0 6px 12px rgba(74, 144, 226, 0.4);
+  outline: 3px solid #4a90e2;
+  outline-offset: 2px;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(74, 144, 226, 0.4);
 }
 
 .card.moving {
-    animation: cardMove 0.3s ease-out;
+  animation: cardMove 0.3s ease-out;
 }
 
 @keyframes cardMove {
-    0% {
-        transform: scale(1.05);
-        box-shadow: 0 8px 16px rgba(74, 144, 226, 0.5);
-    }
+  0% {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(74, 144, 226, 0.5);
+  }
 
-    100% {
-        transform: scale(1);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
 }
 
 /* Card placeholder for empty slots */
 .card-placeholder {
-    width: var(--card-width, 100px);
-    height: var(--card-height, 140px);
-    border: none;
-    border-radius: calc(var(--card-width, 100px) * 0.08);
-    background-color: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-    font-size: calc(var(--card-width, 100px) * 0.14);
+  width: var(--card-width, 100px);
+  height: var(--card-height, 140px);
+  border: none;
+  border-radius: calc(var(--card-width, 100px) * 0.08);
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: calc(var(--card-width, 100px) * 0.14);
 }
 
 .card-placeholder.drop-target {
-    border-color: #4a90e2;
-    background-color: rgba(74, 144, 226, 0.2);
+  border-color: #4a90e2;
+  background-color: rgba(74, 144, 226, 0.2);
 }
