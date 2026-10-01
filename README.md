@@ -2,10 +2,11 @@
 
 A React TypeScript implementation of the classic FreeCell solitaire card game with Microsoft's original RNG algorithm, deployed as a static website on AWS.
 
-![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat&logo=typescript)
-![Bun](https://img.shields.io/badge/Bun-1.1.26-000000?style=flat&logo=bun)
-![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?style=flat&logo=vite)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?style=flat&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat&logo=vite&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-1.4-000000?style=flat&logo=bun&logoColor=white)
+![Biome](https://img.shields.io/badge/Biome-2-60A5FA?style=flat&logo=biome&logoColor=white)
 ![OpenTofu](https://img.shields.io/badge/OpenTofu-1.10+-FFDA18?style=flat&logo=opentofu&logoColor=000000)
 
 - [FreeCell Solitaire](#freecell-solitaire)
@@ -57,9 +58,10 @@ A React TypeScript implementation of the classic FreeCell solitaire card game wi
 
 ## Technology Stack
 
-- **Frontend**: React 18 with TypeScript
+- **Frontend**: React 19 with TypeScript
 - **Build Tool**: Vite
 - **Package Manager**: Bun
+- **Linting/Formatting**: Biome (`bun run lint`, `bun run format`)
 - **Deployment**: AWS S3 + CloudFront (via Terraform/OpenTofu)
 
 ## Project Structure
@@ -69,7 +71,7 @@ A React TypeScript implementation of the classic FreeCell solitaire card game wi
   /src           - React components and game logic
   /public        - Static assets
 /terraform       - Infrastructure as Code
-/dev_tooling     - Development utilities
+/dev_tooling     - Development utilities (card image downloader, deal checker)
 ```
 
 ## Local Development
@@ -101,6 +103,22 @@ bun dev
 ```
 
 The game will be available at http://localhost:5173
+
+### Testing, Linting and Formatting
+
+Run these from the `frontend` directory:
+
+```bash
+bun run test     # Vitest unit tests (rules, RNG, deals)
+bun run lint     # Biome lint
+bun run format   # Biome format --write
+bun run build    # Typecheck + production build
+```
+
+Deals are verified against reference layouts from the classic Microsoft FreeCell
+(games 1, 2, 164, 617, 11982, 32000 and 1000000), kept in
+[`frontend/src/game/msReferenceDeals.ts`](frontend/src/game/msReferenceDeals.ts).
+To check them outside the test runner: `bun ../dev_tooling/test-canonical.ts`.
 
 ## AWS Deployment
 
@@ -189,13 +207,13 @@ The download script in [`dev_tooling/download_cards`](dev_tooling/download_cards
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >=6.26.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >=6.66.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >=6.26.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >=6.66.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | latest |
 
 ## Modules
