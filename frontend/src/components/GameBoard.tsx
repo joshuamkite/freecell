@@ -434,12 +434,15 @@ export function GameBoard() {
                       })
                     }
                     onDragEnd={handleDragEnd}
-                    onClick={() =>
+                    onClick={(e) => {
+                      // Don't let the click bubble to the column drop zone,
+                      // which would attempt the same move a second time
+                      e.stopPropagation()
                       handleCardClick(card, {
                         type: 'tableau',
                         index: columnIndex,
                       })
-                    }
+                    }}
                     onDoubleClick={() =>
                       cardIndex === column.length - LAST_ITEM_INDEX_OFFSET &&
                       handleDoubleClick(card, {

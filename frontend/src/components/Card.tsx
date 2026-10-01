@@ -4,7 +4,7 @@ import './Card.css'
 
 interface CardProps {
   card: CardType
-  onClick?: () => void
+  onClick?: (e: React.MouseEvent) => void
   onDoubleClick?: () => void
   draggable?: boolean
   onDragStart?: (e: React.DragEvent) => void
